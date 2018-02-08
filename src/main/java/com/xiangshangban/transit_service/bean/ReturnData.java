@@ -8,6 +8,28 @@ public class ReturnData {
 	private Object data;//数据
 	private String message;//请求状态描述
 	private String returnCode;//请求状态编码
+	private String pagecountNum;
+	private String totalPages;
+	private String bluetoothId;
+	
+	public String getPagecountNum() {
+		return pagecountNum;
+	}
+	public void setPagecountNum(String pagecountNum) {
+		this.pagecountNum = pagecountNum;
+	}
+	public String getTotalPages() {
+		return totalPages;
+	}
+	public void setTotalPages(String totalPages) {
+		this.totalPages = totalPages;
+	}
+	public String getBluetoothId() {
+		return bluetoothId;
+	}
+	public void setBluetoothId(String bluetoothId) {
+		this.bluetoothId = bluetoothId;
+	}
 	public Object getData() {
 		return data;
 	}
