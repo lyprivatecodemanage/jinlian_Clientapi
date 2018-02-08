@@ -51,10 +51,16 @@ public class Employee {
 //    private String phonePublic;//是否公开手机号  0：公开  1：不公开
 //    private String shiftTime;//可用调休时长（秒）
 //    private String employeeCardNumber;//员工工资卡
+    private List<Post> postList;
     
     
     
-    
+	public List<Post> getPostList() {
+		return postList;
+	}
+	public void setPostList(List<Post> postList) {
+		this.postList = postList;
+	}
 	public String getPostName() {
 		return postName;
 	}
