@@ -122,6 +122,7 @@ public class EmployeeController {
 			emp.setEmployeeStatus("在职");
 			emp.setDepartmentName("我就是要看看到底能有多长");
 			emp.setIsActive("1");
+			data.add(emp);
 			result.put("message", "数据请求成功");
 			result.put("returnCode", "3000");
 			result.put("totalPages", "19");

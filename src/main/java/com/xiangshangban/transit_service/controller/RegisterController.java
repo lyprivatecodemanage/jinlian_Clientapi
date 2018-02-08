@@ -18,9 +18,9 @@ import com.alibaba.fastjson.JSONObject;
 @RestController
 @RequestMapping("/registerController")
 public class RegisterController {
-	public static final String AppId = "";
-	public static final String SecretKey = "";
-	public static final String Token = "";
+	public static final String AppId = "123";
+	public static final String SecretKey = "123";
+	public static final String Token = "123";
 	/**
 	 * 获得接口调用凭证token
 	 * @param jsonString
