@@ -371,6 +371,12 @@ public class DoorController {
 		JSONObject obj = JSON.parseObject(objectString);
 		String doorId = obj.getString("doorId");
 		
+		if(StringUtils.isEmpty(token)){
+			result.put("returnCode", "3006");
+			result.put("message","必传参数为空");
+			return result;
+		}
+		
 		result.put("returnCode", "3000");
 		result.put("message","操作成功");
 		return result;
