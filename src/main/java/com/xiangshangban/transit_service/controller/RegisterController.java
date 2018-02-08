@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 
 
 @RestController
-@RequestMapping("/registerController")
+@RequestMapping("/RegisterController")
 public class RegisterController {
 	public static final String AppId = "123";
 	public static final String SecretKey = "123";

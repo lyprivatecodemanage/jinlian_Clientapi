@@ -21,7 +21,7 @@ import com.xiangshangban.transit_service.bean.Post;
 import com.xiangshangban.transit_service.util.EmptyUtil;
 
 @RestController
-@RequestMapping("/employeeController")
+@RequestMapping("/EmployeeController")
 public class EmployeeController {
 	/**
 	 * 添加人员

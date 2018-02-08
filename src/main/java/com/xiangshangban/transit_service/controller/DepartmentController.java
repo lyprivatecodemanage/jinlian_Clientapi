@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.Department;
 import com.xiangshangban.transit_service.util.EmptyUtil;
 @RestController
-@RequestMapping("/departmentController")
+@RequestMapping("/DepartmentController")
 public class DepartmentController {
 	
 	/**
