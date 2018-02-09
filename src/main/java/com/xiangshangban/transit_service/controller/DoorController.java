@@ -295,7 +295,7 @@ public class DoorController {
 		return result;
 	}
 	
-	@RequestMapping(value="/autho/getHighSettingForFunction	",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
+	@RequestMapping(value="/autho/getHighSettingForFunction",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getHighSettingForFunction(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
 		
@@ -315,12 +315,12 @@ public class DoorController {
 		dmap.put("weatherOpenDoor","1");
 		
 		Map<String,String> emap =new HashMap<>();
-		dmap.put("employeeId","2A42EC2E17944F6EA8E01D7319843D61");
-		dmap.put("employeeName","云溪");
+		emap.put("employeeId","2A42EC2E17944F6EA8E01D7319843D61");
+		emap.put("employeeName","云溪");
 		
 		Map<String,String> tmap =new HashMap<>();
-		dmap.put("endTime","12:00");
-		dmap.put("startTime","08:00");
+		tmap.put("endTime","12:00");
+		tmap.put("startTime","08:00");
 		
 		Map<String,Object> fmap =new HashMap<>();
 		fmap.put("employeeIdList",JSON.toJSON(emap));
@@ -333,23 +333,23 @@ public class DoorController {
 		trmap.put("endTime","10:00");
 		
 		Map<String,Object> timap =new HashMap<>();
-		timap.put("timeRange",JSON.toJSON(trmap));
+		timap.put("timeRange",trmap);
 		timap.put("isDitto","1");
 		timap.put("isAllDay","0");
 		timap.put("week","2");
 		
 		Map<String,Object> domap =new HashMap<>();
-		timap.put("enable_first_card_keep_open","1");
-		timap.put("manager_password","18649866");
-		timap.put("first_publish_password","110");
-		timap.put("second_publish_password","120");
-		timap.put("alarm_time_length_trespass","60");
-		timap.put("fault_count_authentication","5");
-		timap.put("enable_door_keep_open","0");
-		timap.put("threaten_publish_passwrod","130");
-		timap.put("enable_door_event_record","0");
-		timap.put("alarmFlag","1");
-		timap.put("enable_door_calendar","1");
+		domap.put("enable_first_card_keep_open","1");
+		domap.put("manager_password","18649866");
+		domap.put("first_publish_password","110");
+		domap.put("second_publish_password","120");
+		domap.put("alarm_time_length_trespass","60");
+		domap.put("fault_count_authentication","5");
+		domap.put("enable_door_keep_open","0");
+		domap.put("threaten_publish_passwrod","130");
+		domap.put("enable_door_event_record","0");
+		domap.put("alarmFlag","1");
+		domap.put("enable_door_calendar","1");
 		
 		Map<String,Object> map =new HashMap<>();
 		map.put("doorCalendar",JSON.toJSON(dmap));
