@@ -37,6 +37,7 @@ public class DoorController {
 			map.put("message","必传参数为空");
 			return map;
 		}
+		
 		Map<String,String> resultmap = new HashMap<String,String>();
 		resultmap.put("doorId", "10");
 		
