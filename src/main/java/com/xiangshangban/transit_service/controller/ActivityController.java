@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.util.EmptyUtil;
 
 @RestController
-@RequestMapping("ActivityController")
+@RequestMapping("/ActivityController")
 public class ActivityController {
 	private SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat hourSdf = new SimpleDateFormat("mm:ss");
@@ -49,7 +49,7 @@ public class ActivityController {
 		String broadStartTime = jobj.getString("broadStartTime");//开始时间
 		String broadEndTime = jobj.getString("broadEndTime");//结束时间
 		String roastingTime = jobj.getString("roastingTime");//轮播时间间隔 ，单位为秒
-		String doorId = jobj.getString("roastingTime");//门ID
+		String doorId = jobj.getString("doorId");//门ID
 		params.add(token);
 		params.add(templateLevel);
 		params.add(imageKey);
@@ -258,13 +258,10 @@ public class ActivityController {
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
 		String employeeId = obj.getString("employeeId");
-		String doorId  = obj.getString("doorId");
-		String validBeginDate = obj.getString("validBeginDate");
-		String validEndDate = obj.getString("validEndDate");
-		String doorList = obj.getString("doorList");
+		String validBeginDate = obj.getString("validBeginTime");
+		String validEndDate = obj.getString("validEndTime");
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(employeeId)||StringUtils.isEmpty(doorId)||StringUtils.isEmpty(validBeginDate)||StringUtils.isEmpty(validEndDate)
-				||StringUtils.isEmpty(doorList)){
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(employeeId)||StringUtils.isEmpty(validBeginDate)||StringUtils.isEmpty(validEndDate)){
 			map.put("returnCode","3006");
 			map.put("message","必传参数为空");
 			return map;
@@ -285,12 +282,11 @@ public class ActivityController {
 		JSONObject obj = JSON.parseObject(objectString);
 		String employeeName = obj.getString("employeeName");
 		String employeeCompany = obj.getString("employeeCompany");
-		String doorId = obj.getString("doorId");
-		String validBeginDate = obj.getString("validBeginDate");
-		String validEndDate = obj.getString("validEndDate");
+		String validBeginDate = obj.getString("validBeginTime");
+		String validEndDate = obj.getString("validEndTime");
 		String doorList = obj.getString("doorList");
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(doorId)||StringUtils.isEmpty(validBeginDate)
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(validBeginDate)
 				||StringUtils.isEmpty(validEndDate)||StringUtils.isEmpty(doorList)){
 			map.put("returnCode","3006");
 			map.put("message","必传参数为空");
