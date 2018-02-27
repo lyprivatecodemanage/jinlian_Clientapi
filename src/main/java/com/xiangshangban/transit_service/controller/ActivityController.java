@@ -76,7 +76,7 @@ public class ActivityController {
 			result.put("returnCode", "9999");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "操作成功");
 			result.put("returnCode", "3000");
 			result.put("templateId", "12358555");//添加成功时返回主题ID
@@ -138,7 +138,7 @@ public class ActivityController {
 			result.put("returnCode", "9999");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "操作成功");
 			result.put("returnCode", "3000");
 			return result;
@@ -174,7 +174,7 @@ public class ActivityController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "操作成功");
 			result.put("returnCode", "3000");
 			return result;

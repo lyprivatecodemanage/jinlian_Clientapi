@@ -58,7 +58,7 @@ public class EmployeeController {
 			result.put("returnCode", "4102");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "数据请求成功");
 			result.put("returnCode", "3000");
 			result.put("employeeId", "788aef438888");//添加成功时返回员工ID
@@ -105,7 +105,7 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			List<Employee> data = new ArrayList<Employee>();
 			List<Post> postList = new ArrayList<Post>();
 			Employee emp = new Employee();
@@ -186,7 +186,7 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "数据请求成功");
 			result.put("returnCode", "3000");
 			return result;
@@ -222,7 +222,7 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("message", "数据请求成功");
 			result.put("returnCode", "3000");
 			return result;
@@ -258,7 +258,7 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			Employee employee = new Employee();
 			List<Post> postList = new ArrayList<Post>();
 			Post post1 = new Post();

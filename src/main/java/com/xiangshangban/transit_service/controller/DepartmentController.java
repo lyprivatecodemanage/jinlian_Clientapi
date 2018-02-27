@@ -49,7 +49,7 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("returnCode", "3000");
 			result.put("message", "数据请求成功");
 			result.put("departmentId", "123abc478723");
@@ -94,7 +94,7 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("returnCode", "3000");
 			result.put("message", "数据请求成功");
 			return result;
@@ -130,7 +130,7 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			result.put("returnCode", "3000");
 			result.put("message", "数据请求成功");
 			return result;
@@ -166,7 +166,7 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(RegisterController.Token.equals(token)){
+		if(TokenController.Token.equals(token)){
 			List<Department> childrenList = new ArrayList<Department>();
 			Department childrenDepartment = new Department("204E097D2CF24BE68D0349148A82B5B7",
 					"01", "子部门", "hhahaha", "", null, null, 
