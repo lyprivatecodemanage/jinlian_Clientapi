@@ -1,12 +1,16 @@
 package com.xiangshangban.transit_service.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.Department;
+import com.xiangshangban.transit_service.bean.TokenCompany;
+import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
 @RestController
 @RequestMapping("/DepartmentController")
 public class DepartmentController {
+	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
+	@Autowired
+	TokenCompanyService tokenCompanyService;
 	
 	/**
 	 * 添加部门
@@ -49,16 +60,24 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("returnCode", "3000");
-			result.put("message", "数据请求成功");
-			result.put("departmentId", "123abc478723");
-			return result;
-		}else{
-			result.put("returnCode", "9999");
+		
+		boolean b = CompareTime(token);
+			
+		if(!b){
+			result.put("returnCode", "3014");
 			result.put("message", "token验证失败");
 			return result;
 		}
+		
+		/**
+		 * 调用新增部门接口
+		 */
+		
+		
+		result.put("returnCode", "3000");
+		result.put("message", "数据请求成功");
+		result.put("departmentId", "123abc478723");
+		return result;
 	}
 	/**
 	 * 修改部门信息
@@ -188,4 +207,29 @@ public class DepartmentController {
 			return result;
 		}
 	}
+	
+	public boolean CompareTime(String token){
+		//验证token是否存在
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+				
+		if(tokenCompany!=null){
+					
+			try {
+				//获取token过期时间 转成date类型
+				Date date = sdf.parse(tokenCompany.getExpirationTime());
+				//当前时间
+				Date newdate = sdf.parse(sdf.format(new Date()));
+						
+				if(date.getTime()>=newdate.getTime()){
+					return true;
+				}
+						
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
 }
