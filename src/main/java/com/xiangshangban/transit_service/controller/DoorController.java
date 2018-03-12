@@ -46,6 +46,15 @@ public class DoorController {
 			map.put("message","必传参数为空");
 			return map;
 		}
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			map.put("returnCode", 3014);
+			map.put("message", "token验证失败");
+			return map;
+
+		}
+		//获取公司id
 		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
 		Map<String,String> resultmap = new HashMap<String,String>();
 		resultmap.put("doorId", "10");
