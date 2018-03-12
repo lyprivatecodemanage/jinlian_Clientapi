@@ -1,7 +1,9 @@
 package com.xiangshangban.transit_service.service.impl;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,4 +59,27 @@ public class TokenCompanyServiceImpl implements TokenCompanyService {
 		return tokenCompanyMapper.selectByToken(token);
 	}
 
+	public boolean CompareTime(String token){
+		//验证token是否存在
+		TokenCompany tokenCompany = selectByToken(token);
+				
+		if(tokenCompany!=null){
+					
+			try {
+				//获取token过期时间 转成date类型
+				Date date = sdf.parse(tokenCompany.getExpirationTime());
+				//当前时间
+				Date newdate = sdf.parse(sdf.format(new Date()));
+						
+				if(date.getTime()>=newdate.getTime()){
+					return true;
+				}
+						
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
 }
