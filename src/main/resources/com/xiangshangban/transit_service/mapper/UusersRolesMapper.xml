@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiangshangban.transit_service.dao.UusersRolesMapper">
+  <resultMap id="BaseResultMap" type="com.xiangshangban.transit_service.bean.UusersRolesKey">
+    <id column="roleid" jdbcType="VARCHAR" property="roleId" />
+    <id column="userid" jdbcType="VARCHAR" property="userId" />
+    <result column="company_id" jdbcType="VARCHAR" property="companyId" />
+    <result column="history_user_ids" jdbcType="VARCHAR" property="historyUserIds" />
+  </resultMap>
+  <resultMap id="JurisdictionMap" type="com.xiangshangban.transit_service.bean.Upermission">
+  	<id column="permissionid" jdbcType="VARCHAR" property="permissionid" />
+    <result column="permissionurl" jdbcType="VARCHAR" property="permissionurl" />
+    <result column="permissiondescribe" jdbcType="VARCHAR" property="permissiondescribe" />
+  </resultMap>
+  <resultMap type="com.xiangshangban.transit_service.bean.Uroles" id="BaseRolesResultMap">
+  	<result column="roleid" property="roleid"/>
+  	<result column="rolename" property="rolename"/>
+  	<result column="description" property="description"/>
+  </resultMap>
+  <sql id="BaseList">
+  	roleid,userid,company_id,history_user_ids
+  </sql>
+  <sql id="Base_role_List">
+    roleid, rolename, description
+  </sql>
+  <delete id="deleteByPrimaryKey" parameterType="com.xiangshangban.transit_service.bean.UusersRolesKey">
+    delete from u_users_roles
+    where roleid = #{roleId,jdbcType=VARCHAR}
+      and userid = #{userId,jdbcType=VARCHAR}
+      and company_id = #{companyId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.transit_service.bean.UusersRolesKey">
+    insert into u_users_roles (roleid, userid,company_id,history_user_ids)
+    values (#{roleId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, #{historyUserIds,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.transit_service.bean.UusersRolesKey">
+    insert into u_users_roles
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        roleid,
+      </if>
+      <if test="userId != null">
+        userid,
+      </if>
+      <if test="companyId != null">
+     	 company_id
+      </if>
+      <if test="historyUserIds != null">
+     	 history_user_ids
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null">
+     	#{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="historyUserIds != null">
+     	#{historyUserIds,jdbcType=VARCHAR}
+      </if>
+    </trim>
+  </insert>
+  
+  <select id="SelectAdministrator" resultMap="BaseResultMap">
+  	select
+  	<include refid="BaseList"></include>
+  	from organization.u_users_roles
+  	where roleid = #{roleId,jdbcType=VARCHAR}
+  	and company_id = #{companyId,jdbcType=VARCHAR}
+  </select>
+  
+  <update id="updateAdminClearHist">
+  	update organization.u_users_roles
+  	set history_user_ids = '',roleid = #{roleId,jdbcType=VARCHAR}
+  	where userid = #{userId,jdbcType=VARCHAR}
+  	and company_id = #{companyId,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateAdministrator">
+  	update organization.u_users_roles
+  	set history_user_ids = #{historyUserIds,jdbcType=VARCHAR},roleid = #{roleId,jdbcType=VARCHAR}
+  	where userid = #{newUserId,jdbcType=VARCHAR}
+  	and company_id = #{companyId,jdbcType=VARCHAR}
+  </update>
+  
+  <select id="SelectUserIdByPermission" parameterType="java.lang.String" resultMap="JurisdictionMap">
+	select * from u_permission
+	where permissionid in
+	(select permissionid from u_roles_permission
+	where roleid = 
+	(SELECT roleid FROM "organization".u_users_roles
+	where userid = #{userId,jdbcType=VARCHAR}
+	and company_id = #{companyId,jdbcType=VARCHAR}))
+  </select>
+  
+  <select id="SelectRoleByUserId" resultType="com.xiangshangban.transit_service.bean.Uroles" resultMap="BaseRolesResultMap">
+  	select 
+  	<include refid="Base_role_List"></include>
+  	from u_roles
+  	where roleid = 
+  	(select roleid 
+  	from u_users_roles
+  	where userid = #{userId,jdbcType=VARCHAR}
+  	and company_id = #{companyId,jdbcType=VARCHAR}
+  	)
+  </select>
+  <select id="selectCompanyByUserIdRoleId" resultMap="BaseResultMap">
+  	select
+  	<include refid="BaseList"/>
+  	from u_users_roles
+  	where userid = #{userId}
+  	and roleid = #{roleId}
+  </select>
+</mapper>
