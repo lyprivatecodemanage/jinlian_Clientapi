@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,12 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.ReturnData;
+import com.xiangshangban.transit_service.bean.TokenCompany;
+import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.utils.EmptyUtil;
 
 @RestController
 @RequestMapping("/DoorController")
 public class DoorController {
-
+	@Autowired
+	private TokenCompanyService tokenCompanyService;
 	/**
 	 * 添加门和绑定设备
 	 * @param objectString
@@ -42,7 +46,7 @@ public class DoorController {
 			map.put("message","必传参数为空");
 			return map;
 		}
-		
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
 		Map<String,String> resultmap = new HashMap<String,String>();
 		resultmap.put("doorId", "10");
 		
