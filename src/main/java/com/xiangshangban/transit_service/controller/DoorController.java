@@ -22,7 +22,12 @@ import com.xiangshangban.transit_service.utils.EmptyUtil;
 @RequestMapping("/DoorController")
 public class DoorController {
 
-	
+	/**
+	 * 添加门和绑定设备
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/basic/addDoor",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> addDoor(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> map = new HashMap<String, Object>();
@@ -46,7 +51,12 @@ public class DoorController {
 		map.put("message","操作成功");
 		return map;
 	}
-	
+	/**
+	 * 门禁权限下发
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/employee/handOutEmployeePermission",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public ReturnData handOutEmployeePermission(@RequestBody String objectString,HttpServletRequest request){
 		ReturnData rd = new ReturnData();
@@ -82,7 +92,12 @@ public class DoorController {
 		return rd;
 	}
 	
-		
+	/**
+	 * 设备已有权限查询
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/autho/getRelateEmpPermissionInfo",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getRelateEmpPermissionInfo(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -124,7 +139,12 @@ public class DoorController {
 		result.put("message","数据请求成功/请求数据不存在");
 		return result;
 	}
-	
+	/**
+	 * 门已有权限删除
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/employee/deleteEmployeeInformationDev",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> deleteEmployeeInformationDev(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -144,7 +164,12 @@ public class DoorController {
 		result.put("message","已执行删除设备上人员权限的操作");
 		return result;
 	}
-	
+	/**
+	 * 所有设备信息查询
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/findDeviceInformation",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> findDeviceInformation(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -187,7 +212,12 @@ public class DoorController {
 		result.put("message","数据请求成功");
 		return result;
 	}
-	
+	/**
+	 * 更改门与设备的绑定关系
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/basic/updateDoor",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> updateDoor(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -208,7 +238,12 @@ public class DoorController {
 		result.put("message","数据请求成功");
 		return result;
 	}
-	
+	/**
+	 * 门禁记录查询
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/record/getInOutRecord",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getInOutRecord(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -246,7 +281,12 @@ public class DoorController {
 		result.put("message","数据请求成功");
 		return result;
 	}
-	
+	/**
+	 * 门禁参数设置
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/handOutDoorFeaturesSetup",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> handOutDoorFeaturesSetup(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -295,7 +335,12 @@ public class DoorController {
 		result.put("message","已执行下发门禁设置操作");
 		return result;
 	}
-	
+	/**
+	 * 门禁参数查询
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/autho/getHighSettingForFunction",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getHighSettingForFunction(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
@@ -363,7 +408,12 @@ public class DoorController {
 		result.put("message","已执行下发门禁设置操作");
 		return result;
 	}
-	
+	/**
+	 * 删除门
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value="/basic/delDoor",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> delDoor(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> result = new HashMap<>();
