@@ -89,11 +89,11 @@ public class EmployeeController {
 			TokenCompany tc = tokenCompanyService.selectByToken(token);
 			
 			// 查看当前管理员及历史管理员
-			List<UusersRolesKey> list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			UusersRolesKey list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
 			
 			Map<String,String> hmap = new HashMap<>();
 			hmap.put("companyId", tc.getCompanyId());
-			hmap.put("accessUserId",list.get(0).getUserId());
+			hmap.put("accessUserId",list.getUserId());
 			
 			Map<String,String> dateMap = new HashMap<>();
 			dateMap.put("employeeName",employeeName);
@@ -177,11 +177,11 @@ public class EmployeeController {
 			TokenCompany tc = tokenCompanyService.selectByToken(token);
 			
 			// 查看当前管理员及历史管理员
-			List<UusersRolesKey> list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			UusersRolesKey accessUserId = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
 			
 			Map<String,String> hmap = new HashMap<>();
 			hmap.put("companyId", tc.getCompanyId());
-			hmap.put("accessUserId",list.get(0).getUserId());
+			hmap.put("accessUserId",accessUserId.getUserId());
 			
 			Map<String,String> dateMap = new HashMap<>();
 			dateMap.put("companyName",companyName);
