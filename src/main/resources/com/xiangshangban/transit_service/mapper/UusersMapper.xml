@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiangshangban.transit_service.dao.UusersMapper">
+	<resultMap id="BaseResultMap" type="com.xiangshangban.transit_service.bean.Uusers">
+		<result column="userid" property="userid" />
+		<result column="account" property="account" />
+		<result column="userpwd" property="userpwd" />
+		<result column="temporarypwd" property="temporarypwd" />
+		<result column="salt" property="salt" />
+		<result column="username" property="username" />
+		<result column="phone" property="phone" />
+		<result column="create_time" property="createTime" />
+		<result column="last_login_time" jdbcType="DATE" property="lastLoginTime" />
+		<result column="status" property="status" />
+		<result column="wechat_id" property="wechatId" />
+		<result column="wechat_code" property="wechatCode" />
+		<result column="wechat_name" property="wecharName" />
+		<result column="company_id" property="companyId" />
+		<result column="is_active" property="isActive" />
+	</resultMap>
+	<resultMap id="BaseRoleMap" type="com.xiangshangban.transit_service.bean.Uroles">
+		<id column="roleid" property="roleid"/>
+		<result column="rolename" property="rolename"/>
+		<result column="description" property="description"/>
+	</resultMap>
+	<resultMap
+		type="com.xiangshangban.transit_service.bean.ChangePhone"
+		id="ChangePhoneResultMap">
+		<result column="userid" property="userId" />
+		<result column="username" property="userName" />
+		<result column="post_name" property="postName" />
+		<result column="company_id" property="companyId" />
+		<result column="company_name" property="companyName" />
+	</resultMap>
+	
+	<resultMap type="com.xiangshangban.transit_service.bean.Employee" id="EmployeeMap">
+		<result column="employee_id" property="employeeId" />
+		<result column="employee_name" property="employeeName" />
+		<result column="login_name" property="loginName" />
+		<result column="employee_img_url" property="employeeImgUrl" />
+	</resultMap>
+	
+	<sql id="Employee_list">
+		employee_id,employee_name,login_name,employee_img_url
+	</sql>
+	
+	<sql id="Base_roles">
+		roleid,rolename,description
+	</sql>
+	<sql id="Base_Column_List">
+		userid, account, userpwd, temporarypwd, salt, username,
+		phone, create_time, last_login_time, status, wechat_id, wechat_code,
+		wechat_name
+	</sql>
+	<sql id="Base_Column_List_A">
+		u.userid, u.account, u.userpwd, u.temporarypwd, u.salt,
+		u.username, u.phone, u.create_time, u.last_login_time, u.status,
+		u.wechat_id, u.wechat_code, u.wechat_name
+	</sql>
+	<select id="selectIdentityAuthentication" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(*) from u_users u,user_company uc,company_ c
+		where u.phone =
+		#{phone} and u.username = #{userName} and
+		c.company_name = #{companyName}
+		and u.userid = uc.user_id and
+		uc.company_id = c.company_id
+	</select>
+	<select id="selectPersonalInformationVerification"
+		parameterType="java.lang.String" resultMap="ChangePhoneResultMap">
+		select
+		p.post_name,u.username,u.userid,c.company_id,c.company_name
+		from
+		u_users u,connect_emp_post_ cep,post_ p,company_ c where u.phone =
+		#{phone} and u.userid = cep.employee_id and cep.post_id =
+		p.post_id and
+		p.company_id = c.company_id
+	</select>
+	<select id="selectApprovalPerson" parameterType="java.lang.String"
+		resultMap="ChangePhoneResultMap">
+		select
+		u.userid,u.username,c.company_id,c.company_name
+		from
+		u_users_roles uur,u_roles r,u_users u,company_ c
+		where uur.company_id =
+		#{companyId} and r.rolename =
+		'admin' and uur.roleid = r.roleid and
+		u.userid = uur.userid
+		and c.company_id = #{companyId}
+	</select>
+	<select id="selectRoles" parameterType="java.lang.String"
+		resultMap="BaseRoleMap">
+		select 
+		<include refid="Base_roles" />
+		from organization.u_roles
+		where roleid in (
+		select roleid
+		from u_users_roles where userid = (select userid from
+		u_users where phone
+		= #{phone}))
+	</select>
+	<select id="selectCompanyByToken" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		u.userid,uc.company_id
+		from
+		u_users u,login_
+		l,user_company uc 
+		where l.token = #{token} and l.phone = u.phone and
+		uc.user_id = u.userid and uc.type = '1'
+		and uc.current_option = '1' AND l.status='1' 
+	</select>
+	<select id="selectCompanyBySessionId" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		u.userid,uc.company_id
+		from
+		u_users u,login_
+		l,user_company uc
+		where l.session_id = #{sessionId} and l.phone =
+		u.phone and uc.user_id = u.userid and uc.current_option = '1' and l.status='1' and uc.is_active = '1' and uc.type = '0'
+		order by
+		l.create_time desc limit 1 offset 0
+	</select>
+
+	<select id="selectByPrimaryKey" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from organization.u_users
+		where status = '0' and userid = #{userid}
+	</select>
+	
+	<select id="selectById" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from u_users
+		where userid = #{userid}
+	</select>
+	
+	<select id="selectByAccount" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from organization.u_users
+		where account = #{account}
+	</select>
+	<select id="selectByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" /> ,uc.company_id
+		from u_users u 
+		left join user_company uc on u.userid = uc.user_id and uc.current_option = '1' and uc.type = #{type}
+		where u.status = '1' and u.phone = #{phone}
+	</select>
+	<select id="selectUserByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from u_users  
+		where phone = #{phone}
+	</select>
+	<select id="isActive" parameterType="java.lang.String" resultType="int">
+		select count(uc.company_id)
+		from u_users u,user_company uc 
+		where status = '1' and phone = #{phone} and u.userid = uc.user_id and uc.is_active='1'
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		organization.u_users
+		where userid = #{userid}
+	</delete>
+	<insert id="insert" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		insert into
+		organization.u_users (userid, account, userpwd,
+		temporarypwd, salt,
+		username, phone, create_time,
+		last_login_time, status, wechat_id,
+		wechat_code, wechat_name)
+		values (#{userid}, #{account},#{userpwd},
+		#{temporarypwd}, #{salt}, #{username}, #{phone}, #{createTime}
+		#{lastLoginTime}, #{status}, #{wechatId}, #{wechatCode},
+		#{wechatName})
+	</insert>
+	<insert id="insertSelective" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		insert into organization.u_users
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userid != null">
+				userid,
+			</if>
+			<if test="account != null">
+				account,
+			</if>
+			<if test="userpwd != null">
+				userpwd,
+			</if>
+			<if test="temporarypwd != null">
+				temporarypwd,
+			</if>
+			<if test="salt != null">
+				salt,
+			</if>
+			<if test="username != null">
+				username,
+			</if>
+			<if test="phone != null">
+				phone,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="lastLoginTime != null">
+				last_login_time,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="wechatId != null">
+				wechat_id,
+			</if>
+			<if test="wechatCode != null">
+				wechat_code,
+			</if>
+			<if test="wechatName != null">
+				wechat_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userid != null">
+				#{userid},
+			</if>
+			<if test="account != null">
+				#{account},
+			</if>
+			<if test="userpwd != null">
+				#{userpwd},
+			</if>
+			<if test="temporarypwd != null">
+				#{temporarypwd},
+			</if>
+			<if test="salt != null">
+				#{salt},
+			</if>
+			<if test="username != null">
+				#{username},
+			</if>
+			<if test="phone != null">
+				#{phone},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="lastLoginTime != null">
+				#{lastLoginTime},
+			</if>
+			<if test="status != null">
+				#{status},
+			</if>
+			<if test="wechatId != null">
+				#{wechatId},
+			</if>
+			<if test="wechatCode != null">
+				#{wechatCode},
+			</if>
+			<if test="wechatName != null">
+				#{wechatName},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		update organization.u_users
+		<set>
+			<if test="account != null">
+				account = #{account},
+			</if>
+			<if test="userpwd != null">
+				userpwd = #{userpwd},
+			</if>
+			<if test="temporarypwd != null">
+				temporarypwd = #{temporarypwd},
+			</if>
+			<if test="salt != null">
+				salt = #{salt},
+			</if>
+			<if test="username != null">
+				username = #{username},
+			</if>
+			<if test="phone != null">
+				phone = #{phone},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime},
+			</if>
+			<if test="lastLoginTime != null">
+				last_login_time = #{lastLoginTime},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="wechatId != null">
+				wechat_id = #{wechatId},
+			</if>
+			<if test="wechatCode != null">
+				wechat_code = #{wechatCode},
+			</if>
+			<if test="wechatName != null">
+				wechat_name = #{wechatName},
+			</if>
+		</set>
+		where userid = #{userid}
+	</update>
+	
+	<update id="updateUserByPhone" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+	update organization.u_users
+		<set>
+			<if test="account != null">
+				account = #{account},
+			</if>
+			<if test="userpwd != null">
+				userpwd = #{userpwd},
+			</if>
+			<if test="temporarypwd != null">
+				temporarypwd = #{temporarypwd},
+			</if>
+			<if test="salt != null">
+				salt = #{salt},
+			</if>
+			<if test="username != null">
+				username = #{username},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime},
+			</if>
+			<if test="lastLoginTime != null">
+				last_login_time = #{lastLoginTime},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="wechatId != null">
+				wechat_id = #{wechatId},
+			</if>
+			<if test="wechatCode != null">
+				wechat_code = #{wechatCode},
+			</if>
+			<if test="wechatName != null">
+				wechat_name = #{wechatName},
+			</if>
+		</set>
+		where phone = #{phone}
+	</update>
+	
+	<update id="updateByPrimaryKey" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		update
+		organization.u_users
+		set account = #{account},
+		userpwd = #{userpwd},
+		temporarypwd = #{temporarypwd},
+		salt = #{salt},
+		username = #{username},
+		phone = #{phone},
+		create_time = #{createTime},
+		last_login_time =
+		#{lastLoginTime,jdbcType=DATE},
+		status = #{status},
+		wechat_id =
+		#{wechatId},
+		wechat_code = #{wechatCode},
+		wechat_name = #{wechatName}
+		where userid = #{userid}
+	</update>
+	<update id="updateSmsCode">
+		update organization.u_users
+		set temporarypwd =
+		#{temporarypwd}
+		where phone = #{phone}
+	</update>
+	<select id="SelectCountByPhone" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(userid)
+		from organization.u_users
+		where phone = #{phone}
+	</select>
+	
+	<select id="selectAdminByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select userid,username from u_users
+	where userid =
+	(select userid from u_users_roles uur
+	where company_id=
+	(select uc.company_id from user_company uc
+	join u_users uu
+	on uc.user_id = uu.userid
+	join company_ com
+	on uc.company_id = com.company_id
+	where phone = #{phone})
+	and roleid = #{roleId})
+	</select>
+	
+	<delete id="deleteEmployee" parameterType="java.lang.String">
+		delete from employee_ where employee_id = #{userId}
+	</delete>
+	
+	<insert id="insertEmployee" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		insert into employee_(employee_id,employee_name,company_id,login_name,employee_sex,department_id,operater_time)
+		values(#{userid},#{username},#{companyId},#{phone},'',#{departmentId},#{operaterTime})
+	</insert>
+	
+	<select id="SelectEmployeeIdByPhone" parameterType="java.lang.String" resultType="java.lang.String">
+		select employee_id from employee_ where login_name=#{phone} LIMIT 1
+	</select>
+	
+	<select id="SeletctEmployeeByUserId" resultMap="EmployeeMap">
+		select
+		<include refid="Employee_list"/>
+		from employee_
+		where employee_id = #{userId}
+		and company_id = #{companyId}
+	</select>
+		<!-- 修改密码 -->
+	<update id="updatePaawordByPhone" parameterType="com.xiangshangban.transit_service.bean.Uusers">
+		update u_users set userpwd = #{userpwd} where phone = #{phone}
+	</update>
+</mapper>
