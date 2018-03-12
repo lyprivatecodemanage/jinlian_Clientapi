@@ -1,5 +1,6 @@
 package com.xiangshangban.transit_service.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.xiangshangban.transit_service.bean.Department;
 import com.xiangshangban.transit_service.bean.TokenCompany;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
+import com.xiangshangban.transit_service.utils.HttpClientUtil;
+import com.xiangshangban.transit_service.utils.PropertiesUtils;
 @RestController
 @RequestMapping("/DepartmentController")
 public class DepartmentController {
@@ -48,12 +51,11 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token = jobj.getString("token");
 		String departmentName = jobj.getString("departmentName");
 		String departmentParentId = jobj.getString("departmentParentId");
 		params.add(token);
 		params.add(departmentName);
-		params.add(departmentParentId);
 		boolean isEmpty = EmptyUtil.isEmpty(params);
 		if(!isEmpty){
 			result.put("returnCode", "3006");
@@ -62,23 +64,56 @@ public class DepartmentController {
 		}
 		
 		boolean b = CompareTime(token);
-			
+		
 		if(!b){
 			result.put("returnCode", "3014");
 			result.put("message", "token验证失败");
 			return result;
 		}
 		
-		/**
-		 * 调用新增部门接口
-		 */
-		
-		
-		result.put("returnCode", "3000");
-		result.put("message", "数据请求成功");
-		result.put("departmentId", "123abc478723");
-		return result;
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("departmentName",departmentName);
+			if("".equals(departmentParentId)||departmentParentId==null){
+				dateMap.put("departmentParentId",tc.getCompanyId());
+			}else{
+				dateMap.put("departmentParentId",departmentParentId);
+			}
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/DepartmentController/insertDepartment",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("data",json.get("data"));
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		}
 	}
+	
 	/**
 	 * 修改部门信息
 	 * @param jsonString
@@ -95,7 +130,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token =jobj.getString("token");
 		String departmentName = jobj.getString("departmentName");//部门名称
 		String departmentParentId = jobj.getString("departmentParentId");//上级部门ID
 		String employeeId = jobj.getString("employeeId");//部门负责人ID
@@ -106,20 +141,54 @@ public class DepartmentController {
 		params.add(departmentParentId);
 		params.add(employeeId);
 		params.add(departmentId);
-		params.add(departmentDescribe);
 		boolean isEmpty = EmptyUtil.isEmpty(params);
 		if(!isEmpty){
 			result.put("returnCode", "3006");
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("returnCode", "3000");
-			result.put("message", "数据请求成功");
-			return result;
-		}else{
-			result.put("returnCode", "9999");
+		
+		boolean b = CompareTime(token);
+		
+		if(!b){
+			result.put("returnCode", "3014");
 			result.put("message", "token验证失败");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("departmentName",departmentName);
+			dateMap.put("departmentDescribe", departmentParentId);
+			dateMap.put("employeeId", departmentParentId);
+			dateMap.put("departmentId", departmentParentId);
+			dateMap.put("departmentParentId", departmentParentId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/DepartmentController/updateByDepartment",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
@@ -139,7 +208,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token = jobj.getString("token");
 		String departmentId = jobj.getString("departmentId");//部门ID
 		params.add(token);
 		params.add(departmentId);
@@ -149,13 +218,44 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("returnCode", "3000");
-			result.put("message", "数据请求成功");
-			return result;
-		}else{
-			result.put("returnCode", "9999");
+
+		boolean b = CompareTime(token);
+		
+		if(!b){
+			result.put("returnCode", "3014");
 			result.put("message", "token验证失败");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("departmentId",departmentId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/DepartmentController/deleteByDepartment",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
@@ -175,7 +275,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token = jobj.getString("token");
 		String departmentId = jobj.getString("departmentId");//部门ID
 		params.add(token);
 		params.add(departmentId);
@@ -185,25 +285,44 @@ public class DepartmentController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			List<Department> childrenList = new ArrayList<Department>();
-			Department childrenDepartment = new Department("204E097D2CF24BE68D0349148A82B5B7",
-					"01", "子部门", "hhahaha", "", null, null, 
-					"104E097D2CF24BE68D0349148A82B5B7", "腾讯", "腾讯", "A4F5A833EE674AE6B85F5582CCB3550D", 
-					null, null, null);
-			childrenList.add(childrenDepartment);
-			Department department = new Department("104E097D2CF24BE68D0349148A82B5B7",
-					"01", "部门", "hhahaha", "", null, null, 
-					"0", "父部门名称", "腾讯", "A4F5A833EE674AE6B85F5582CCB3550D", 
-					null, null, childrenList);
-			
-			result.put("returnCode", "3000");
-			result.put("message", "数据请求成功");
-			result.put("data", department);
-			return result;
-		}else{
-			result.put("returnCode", "9999");
+		boolean b = CompareTime(token);
+		
+		if(!b){
+			result.put("returnCode", "3014");
 			result.put("message", "token验证失败");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("departmentId",departmentId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/DepartmentController/findDepartmentById",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("data",json.get("data"));
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}

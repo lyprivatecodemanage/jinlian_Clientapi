@@ -1,5 +1,6 @@
 package com.xiangshangban.transit_service.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.entity.ContentType;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,11 +22,25 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.Employee;
 import com.xiangshangban.transit_service.bean.Post;
+import com.xiangshangban.transit_service.bean.TokenCompany;
+import com.xiangshangban.transit_service.bean.Uroles;
+import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.TokenCompanyService;
+import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
+import com.xiangshangban.transit_service.utils.HttpClientUtil;
+import com.xiangshangban.transit_service.utils.PropertiesUtils;
 
 @RestController
 @RequestMapping("/EmployeeController")
 public class EmployeeController {
+	
+	@Autowired
+	TokenCompanyService tokenCompanyService;
+	
+	@Autowired
+	UusersRolesService uusersRolesService;
+	
 	/**
 	 * 添加人员
 	 * @param jsonString
@@ -39,7 +57,7 @@ public class EmployeeController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token = jobj.getString("token");
 		String employeeName = jobj.getString("employeeName");//姓名
 		String loginName = jobj.getString("loginName");//员工登录手机号
 		String departmentId = jobj.getString("departmentId");//所属部门id，没有传参时，默认在全公司下
@@ -58,14 +76,55 @@ public class EmployeeController {
 			result.put("returnCode", "4102");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "数据请求成功");
-			result.put("returnCode", "3000");
-			result.put("employeeId", "788aef438888");//添加成功时返回员工ID
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			// 查看当前管理员及历史管理员
+			List<UusersRolesKey> list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",list.get(0).getUserId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("employeeName",employeeName);
+			dateMap.put("loginName",loginName);
+			dateMap.put("departmentId",departmentId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/insertEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("data",json.get("data"));
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
@@ -85,10 +144,10 @@ public class EmployeeController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = request.getHeader("token");
+		String token = jobj.getString("token");
 		String companyName = jobj.getString("companyName");//当前组织机构（公司名称）
 		String departmentName = jobj.getString("departmentName");//部门名称（模糊查询）
-		String departmentPrincipal = jobj.getString("departmentId");//部门负责人（模糊查询）
+		String departmentPrincipal = jobj.getString("departmentPrincipal");//部门负责人（模糊查询）
 		String pageNum = jobj.getString("pageNum");//整数，页码，默认为1
 		String pageRecordNum = jobj.getString("pageRecordNum");//整数，每页记录数，默认为10
 		String departmentId = jobj.getString("departmentId");//部门ID （该字段为确定查询，非模糊查询）
@@ -105,33 +164,58 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			List<Employee> data = new ArrayList<Employee>();
-			List<Post> postList = new ArrayList<Post>();
-			Employee emp = new Employee();
-			Post post = new Post();
-			postList.add(post);
-			emp.setPostList(postList);
-			emp.setEmployeeId("5A8B2CC5374043C18AB69A14B9DD0040");
-			emp.setEmployeeName("呵呵哒");
-			emp.setLoginName("13655646532");
-			emp.setEmployeeSex("");
-			emp.setDepartmentId("F74725FA3A85494784069D2E007FD280");
-			emp.setEmployeePhone("");
-			emp.setEntryTime("");
-			emp.setEmployeeStatus("在职");
-			emp.setDepartmentName("我就是要看看到底能有多长");
-			emp.setIsActive("1");
-			data.add(emp);
-			result.put("message", "数据请求成功");
-			result.put("returnCode", "3000");
-			result.put("totalPages", "19");
-			result.put("pagecountNum", "2");
-			result.put("data", data);
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			// 查看当前管理员及历史管理员
+			List<UusersRolesKey> list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",list.get(0).getUserId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			dateMap.put("companyName",companyName);
+			dateMap.put("departmentName",departmentName);
+			dateMap.put("departmentPrincipal",departmentPrincipal);
+			dateMap.put("pageNum",pageNum);
+			dateMap.put("pageRecordNum",pageRecordNum);
+			dateMap.put("departmentId",departmentId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/insertEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			if(json.getString("returnCode").equals("3000")){
+				result.put("data",json.get("data"));
+				result.put("returnCode", "3000");
+				result.put("message", "数据请求成功");
+				return result;
+			}
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}

@@ -11,4 +11,6 @@ public interface TokenCompanyService {
 	TokenCompany getToken(String appId,String secretKey);
 	
 	TokenCompany selectByToken(String token);
+	
+	boolean CompareTime(String token);
 }
