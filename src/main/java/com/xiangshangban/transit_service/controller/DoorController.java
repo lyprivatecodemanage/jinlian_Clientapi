@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.ReturnData;
 import com.xiangshangban.transit_service.bean.TokenCompany;
@@ -24,7 +25,6 @@ import com.xiangshangban.transit_service.service.DoorService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.utils.EmptyUtil;
-import com.xiangshangban.transit_service.utils.PropertiesUtils;
 
 @RestController
 @RequestMapping("/DoorController")
@@ -97,15 +97,67 @@ public class DoorController {
 	@RequestMapping(value="/employee/handOutEmployeePermission",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public ReturnData handOutEmployeePermission(@RequestBody String objectString,HttpServletRequest request){
 		ReturnData rd = new ReturnData();
-		
+		Map<String,String> headers = new HashMap<String,String>();
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
 		String immediatelyDownload = obj.getString("immediatelyDownload");
-		String employeePermission = obj.getString("employeePermission");
-		String doorId = obj.getString("doorId");
-		String doorName = obj.getString("doorName");
-		String employeeList = obj.getString("employeeList");
-		String employeeId = obj.getString("employeeId");
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(immediatelyDownload))
+		{
+			rd.setReturnCode("3006");
+			rd.setMessage("必传参数为空");
+			return rd;
+		}
+		JSONArray employeePermission = obj.getJSONArray("employeePermission");
+		if(employeePermission==null||employeePermission.size()<1){
+			rd.setReturnCode("3006");
+			rd.setMessage("必传参数为空");
+			return rd;
+		}else{
+			for(int i=0;i<employeePermission.size();i++){
+				JSONObject employeePermissionObj = employeePermission.getJSONObject(i);
+				String doorId = employeePermissionObj.getString("doorId");
+				String doorName = employeePermissionObj.getString("doorName");
+				String doorOpenStartTime = employeePermissionObj.getString("doorOpenStartTime");
+				String doorOpenEndTime = employeePermissionObj.getString("doorOpenEndTime");
+				JSONArray oneWeekTimeList = employeePermissionObj.getJSONArray("oneWeekTimeList");
+				if(StringUtils.isEmpty(doorId)
+					||StringUtils.isEmpty(doorName)
+					||StringUtils.isEmpty(doorOpenStartTime)
+					||StringUtils.isEmpty(doorOpenEndTime)
+					||oneWeekTimeList==null||oneWeekTimeList.size()<1){
+					rd.setReturnCode("3006");
+					rd.setMessage("必传参数为空");
+					return rd;
+				}else{
+					for(int j=0;j<oneWeekTimeList.size();j++){
+						JSONObject oneWeekTimeListObj = oneWeekTimeList.getJSONObject(j);
+						String isDitto = oneWeekTimeListObj.getString("isDitto");
+						if(StringUtils.isEmpty(isDitto)){
+							rd.setReturnCode("3006");
+							rd.setMessage("必传参数为空");
+							return rd;
+						}
+					}
+				}
+				
+			}
+		}
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			rd.setReturnCode("3014");
+			rd.setMessage("token验证失败");
+			return rd;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		rd = doorService.handOutEmployeePermission(objectString, headers);
+/*		String employeeId = obj.getString("employeeId");
 		String employeeName = obj.getString("employeeName");
 		String rangeDoorOpenType = obj.getString("rangeDoorOpenType");
 		String oneWeekTimeList = obj.getString("oneWeekTimeList");
@@ -113,23 +165,10 @@ public class DoorController {
 		String weekType = obj.getString("weekType");
 		String startTime = obj.getString("startTime");
 		String endTime = obj.getString("endTime");
-		String isDitto = obj.getString("isDitto");
-		String doorOpenStartTime = obj.getString("doorOpenStartTime");
-		String doorOpenEndTime = obj.getString("doorOpenEndTime");
-		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(immediatelyDownload)
-				||StringUtils.isEmpty(employeePermission)
-				||StringUtils.isEmpty(doorId)||StringUtils.isEmpty(doorName)
-				||StringUtils.isEmpty(isDitto)
-				||StringUtils.isEmpty(doorOpenStartTime)
-				||StringUtils.isEmpty(doorOpenEndTime)){
-			rd.setReturnCode("3006");
-			rd.setMessage("必传参数为空");
-			return rd;
-		}
+		String isDitto = obj.getString("isDitto");*/
 
-		rd.setReturnCode("3000");
-		rd.setMessage("已执行下发人员信息操作，请前往门列表查看当前选中的门，了解具体的下发状态");
+		/*rd.setReturnCode("3000");
+		rd.setMessage("已执行下发人员信息操作，请前往门列表查看当前选中的门，了解具体的下发状态");*/
 		return rd;
 	}
 	
@@ -141,7 +180,7 @@ public class DoorController {
 	 */
 	@RequestMapping(value="/autho/getRelateEmpPermissionInfo",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getRelateEmpPermissionInfo(@RequestBody String objectString,HttpServletRequest request){
-		Map<String,Object> result = new HashMap<>();
+		Map<String,Object> result = new HashMap<String,Object>();
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);

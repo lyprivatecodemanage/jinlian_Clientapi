@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xiangshangban.transit_service.bean.ReturnData;
 import com.xiangshangban.transit_service.exception.MyException;
 import com.xiangshangban.transit_service.service.DoorService;
 import com.xiangshangban.transit_service.utils.HttpClientUtil;
@@ -27,7 +28,7 @@ public class DoorServiceImpl implements DoorService{
 		Map<String, Object> result = new HashMap<String ,Object>();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("door")+PropertiesUtils.pathUrl("addDoor");
+			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EntranceGuardController")+PropertiesUtils.pathUrl("addDoor");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");
@@ -41,20 +42,20 @@ public class DoorServiceImpl implements DoorService{
 
 	@Override
 	@Transactional(propagation=Propagation.REQUIRED,rollbackForClassName="Exception")
-	public Map<String, Object> handOutEmployeePermission(Object data, Map<String, String> headers) {
-		Map<String, Object> result = new HashMap<String ,Object>();
+	public ReturnData handOutEmployeePermission(Object data, Map<String, String> headers) {
+		ReturnData rd = new ReturnData();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("door")+PropertiesUtils.pathUrl("handOutEmployeePermission");
+			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EmployeeController")+PropertiesUtils.pathUrl("handOutEmployeePermission");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");
 		}
 		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
 		JSONObject jobj = JSON.parseObject(json);
-		result.put("returnCode", jobj.getString("returnCode"));
-		result.put("message", jobj.getString("message"));
-		return result;
+		rd.setReturnCode(jobj.getString("returnCode"));
+		rd.setMessage(jobj.getString("message"));
+		return rd;
 	}
 	
 }
