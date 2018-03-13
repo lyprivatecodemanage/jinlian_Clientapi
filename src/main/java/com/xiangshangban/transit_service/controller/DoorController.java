@@ -185,20 +185,36 @@ public class DoorController {
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
 		String doorId = obj.getString("doorId");
-		String empName = obj.getString("empName");
+		/*String empName = obj.getString("empName");
 		String deptName = obj.getString("deptName");
 		String openType = obj.getString("openType");
 		String openTime = obj.getString("openTime");
 		String page = obj.getString("page");
-		String rows = obj.getString("rows");
+		String rows = obj.getString("rows");*/
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(page)||StringUtils.isEmpty(rows)){
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(doorId)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
-
-		Map<String,String> map = new HashMap<>();
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		String json = doorService.getRelateEmpPermissionInfo(objectString, headers);
+		result = JSON.parseObject(json, Map.class);
+		/*Map<String,String> map = new HashMap<>();
 		map.put("day_of_week", "1");
 		map.put("deviceName", "无敌的阿凡提设备1");
 		map.put("employee_department_name", "大佬一部");
@@ -216,7 +232,7 @@ public class DoorController {
 		result.put("doorId", "24");
 		result.put("doorName", "阿凡提门");
 		result.put("returnCode", "3000/4203");
-		result.put("message","数据请求成功/请求数据不存在");
+		result.put("message","数据请求成功/请求数据不存在");*/
 		return result;
 	}
 	/**
@@ -232,9 +248,9 @@ public class DoorController {
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
 		String doorId = obj.getString("doorId");
-		String employeeIdList = obj.getString("employeeIdList");
+		JSONArray employeeIdList = obj.getJSONArray("employeeIdList");
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(employeeIdList)||StringUtils.isEmpty(doorId)){
+		if(StringUtils.isEmpty(token)||employeeIdList==null){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
