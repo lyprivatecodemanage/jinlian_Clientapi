@@ -18,14 +18,23 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.ReturnData;
 import com.xiangshangban.transit_service.bean.TokenCompany;
+import com.xiangshangban.transit_service.bean.Uroles;
+import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.DoorService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
+import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.utils.EmptyUtil;
+import com.xiangshangban.transit_service.utils.PropertiesUtils;
 
 @RestController
 @RequestMapping("/DoorController")
 public class DoorController {
 	@Autowired
 	private TokenCompanyService tokenCompanyService;
+	@Autowired
+	private UusersRolesService uusersRolesService;
+	@Autowired
+	private DoorService doorService;
 	/**
 	 * 添加门和绑定设备
 	 * @param objectString
@@ -35,6 +44,9 @@ public class DoorController {
 	@RequestMapping(value="/basic/addDoor",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> addDoor(@RequestBody String objectString,HttpServletRequest request){
 		Map<String,Object> map = new HashMap<String, Object>();
+		Map<String,String> headers = new HashMap<String,String>();
+		Map<String,String> params = new HashMap<String,String>();
+		
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
@@ -52,17 +64,29 @@ public class DoorController {
 			map.put("returnCode", 3014);
 			map.put("message", "token验证失败");
 			return map;
-
 		}
 		//获取公司id
 		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
-		Map<String,String> resultmap = new HashMap<String,String>();
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		//设置请求参数
+		params.put("doorName",doorName);
+		params.put("deviceId",deviceId);
+		Map<String,Object> result = doorService.addDoor(params, headers);
+		if(result==null){
+			map.put("returnCode", "3001");
+			map.put("message", "操作失败");
+			return map;
+		}
+		/*Map<String,String> resultmap = new HashMap<String,String>();
 		resultmap.put("doorId", "10");
-		
 		map.put("data",JSON.toJSON(resultmap));
 		map.put("returnCode","3000");
-		map.put("message","操作成功");
-		return map;
+		map.put("message","操作成功");*/
+		return result;
 	}
 	/**
 	 * 门禁权限下发
@@ -93,8 +117,12 @@ public class DoorController {
 		String doorOpenStartTime = obj.getString("doorOpenStartTime");
 		String doorOpenEndTime = obj.getString("doorOpenEndTime");
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(immediatelyDownload)||StringUtils.isEmpty(employeePermission)||StringUtils.isEmpty(doorId)||StringUtils.isEmpty(doorName)
-		||StringUtils.isEmpty(isDitto)||StringUtils.isEmpty(doorOpenStartTime)||StringUtils.isEmpty(doorOpenEndTime)){
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(immediatelyDownload)
+				||StringUtils.isEmpty(employeePermission)
+				||StringUtils.isEmpty(doorId)||StringUtils.isEmpty(doorName)
+				||StringUtils.isEmpty(isDitto)
+				||StringUtils.isEmpty(doorOpenStartTime)
+				||StringUtils.isEmpty(doorOpenEndTime)){
 			rd.setReturnCode("3006");
 			rd.setMessage("必传参数为空");
 			return rd;
