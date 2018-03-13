@@ -1,11 +1,7 @@
 package com.xiangshangban.transit_service.controller;
 
-import java.text.ParseException;
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,16 +46,15 @@ public class OssController {
 	 * @param funcDirectory 存储模块名称
 	 * @return
 	 */
-	@RequestMapping(value = "/upload",produces = "application/json;charset=UTF-8",method=RequestMethod.POST)
-	public ReturnData appUpload(@RequestBody String jsonString,HttpServletRequest request){ 
+	@RequestMapping(value = "/upload",method=RequestMethod.POST)
+	public ReturnData appUpload(@RequestParam("file")MultipartFile file,HttpServletRequest request){ 
 		ReturnData returnData = new ReturnData();
 		
 		String funcDirectory = "deviceItme";
 		
+		String token = request.getHeader("token");
+		
 		//根据token获得当前用户id,公司id
-		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
-		MultipartFile file = (MultipartFile)jobj.get("file");
 		boolean b = tokenCompanyService.CompareTime(token);
 		
 		if(!b){
