@@ -51,15 +51,12 @@ public class OssController {
 	 * @return
 	 */
 	@RequestMapping(value = "/upload",produces = "application/json;charset=UTF-8",method=RequestMethod.POST)
-	public ReturnData appUpload(@RequestBody String jsonString,HttpServletRequest request){ 
+	public ReturnData appUpload(String token,MultipartFile file,HttpServletRequest request){ 
 		ReturnData returnData = new ReturnData();
 		
 		String funcDirectory = "deviceItme";
 		
 		//根据token获得当前用户id,公司id
-		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
-		MultipartFile file = (MultipartFile)jobj.get("file");
 		boolean b = tokenCompanyService.CompareTime(token);
 		
 		if(!b){
