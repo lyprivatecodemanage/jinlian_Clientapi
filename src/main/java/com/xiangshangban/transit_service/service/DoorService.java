@@ -46,7 +46,7 @@ public interface DoorService {
 	 * @param headers
 	 * @return
 	 */
-	Map<String,Object> updateDoor(Object data,Map<String, String> headers);
+	String updateDoor(Object data,Map<String, String> headers);
 	/**
 	 * 门禁记录查询
 	 * @param data

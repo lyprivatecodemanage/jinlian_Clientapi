@@ -36,9 +36,10 @@ public class DoorServiceImpl implements DoorService{
 			throw new MyException("接口地址获取出错");
 		}
 		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
-		JSONObject jobj = JSON.parseObject(json);
+		/*JSONObject jobj = JSON.parseObject(json);
 		result.put("returnCode", jobj.getString("returnCode"));
-		result.put("message", jobj.getString("message"));
+		result.put("message", jobj.getString("message"));*/
+		result = JSON.parseObject(json, Map.class);
 		return result;
 	}
 	/**
@@ -56,9 +57,10 @@ public class DoorServiceImpl implements DoorService{
 			throw new MyException("接口地址获取出错");
 		}
 		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
-		JSONObject jobj = JSON.parseObject(json);
+		/*JSONObject jobj = JSON.parseObject(json);
 		rd.setReturnCode(jobj.getString("returnCode"));
-		rd.setMessage(jobj.getString("message"));
+		rd.setMessage(jobj.getString("message"));*/
+		rd = JSON.parseObject(json, ReturnData.class);
 		return rd;
 	}
 	/**
@@ -83,56 +85,140 @@ public class DoorServiceImpl implements DoorService{
 	 */
 	@Override
 	public Map<String, Object> deleteEmployeeInformationDev(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EmployeeController")+PropertiesUtils.pathUrl("deleteEmployeeInformationDev");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		/*JSONObject jobj = JSON.parseObject(json);
+		result.put("returnCode", jobj.getString("returnCode"));
+		result.put("message", jobj.getString("message"));*/
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	/**
 	 * 所有设备信息查询
 	 */
 	@Override
 	public Map<String, Object> findDeviceInformation(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("DeviceController")+PropertiesUtils.pathUrl("findDeviceInformation");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		/*JSONObject jobj = JSON.parseObject(json);
+		result.put("returnCode", jobj.getString("returnCode"));
+		result.put("message", jobj.getString("message"));*/
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	/**
 	 * 更改门与设备的绑定关系
 	 */
 	@Override
-	public Map<String, Object> updateDoor(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+	public String updateDoor(Object data, Map<String, String> headers) {
+		/*Map<String, Object> result = new HashMap<String ,Object>();*/
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+					+PropertiesUtils.pathUrl("updateDoor");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		/*JSONObject jobj = JSON.parseObject(json);
+		result.put("returnCode", jobj.getString("returnCode"));
+		result.put("message", jobj.getString("message"));*/
+		return json;
 	}
 	/**
 	 * 门禁记录查询
 	 */
 	@Override
 	public Map<String, Object> getInOutRecord(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+					+PropertiesUtils.pathUrl("getInOutRecord");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	/**
 	 * 门禁参数设置
 	 */
 	@Override
 	public Map<String, Object> handOutDoorFeaturesSetup(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+					+PropertiesUtils.pathUrl("handOutDoorFeaturesSetup");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		/*JSONObject jobj = JSON.parseObject(json);
+		result.put("returnCode", jobj.getString("returnCode"));
+		result.put("message", jobj.getString("message"));*/
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	/**
 	 * 门禁参数查询
 	 */
 	@Override
 	public Map<String, Object> getHighSettingForFunction(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+					+PropertiesUtils.pathUrl("getHighSettingForFunction");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	/**
 	 * 删除门
 	 */
 	@Override
 	public Map<String, Object> delDoor(Object data, Map<String, String> headers) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Object> result = new HashMap<String ,Object>();
+		String url;
+		try {
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+					+PropertiesUtils.pathUrl("delDoor");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new MyException("接口地址获取出错");
+		}
+		String json = HttpClientUtil.sendRequet(url, data, ContentType.APPLICATION_JSON, headers);
+		result = JSON.parseObject(json, Map.class);
+		return result;
 	}
 	
 }

@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.xiangshangban.transit_service.bean.Company;
 import com.xiangshangban.transit_service.bean.ReturnData;
 import com.xiangshangban.transit_service.bean.TokenCompany;
 import com.xiangshangban.transit_service.bean.Uroles;
 import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.CompanyService;
 import com.xiangshangban.transit_service.service.DoorService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.service.UusersRolesService;
@@ -35,6 +37,8 @@ public class DoorController {
 	private UusersRolesService uusersRolesService;
 	@Autowired
 	private DoorService doorService;
+	@Autowired
+	private CompanyService companyService;
 	/**
 	 * 添加门和绑定设备
 	 * @param objectString
@@ -255,9 +259,24 @@ public class DoorController {
 			result.put("message","必传参数为空");
 			return result;
 		}
-
-		result.put("returnCode", "3000");
-		result.put("message","已执行删除设备上人员权限的操作");
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		result= doorService.deleteEmployeeInformationDev(objectString, headers);
+		/*result.put("returnCode", "3000");
+		result.put("message","已执行删除设备上人员权限的操作");*/
 		return result;
 	}
 	/**
@@ -268,7 +287,8 @@ public class DoorController {
 	 */
 	@RequestMapping(value="/findDeviceInformation",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> findDeviceInformation(@RequestBody String objectString,HttpServletRequest request){
-		Map<String,Object> result = new HashMap<>();
+		Map<String,Object> result = new HashMap<String,Object>();
+		Map<String,String> params = new HashMap<String,String>();
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
@@ -276,14 +296,49 @@ public class DoorController {
 		String deviceId = obj.getString("deviceId");
 		String isOnline = obj.getString("isOnline");
 		String activeStatus = obj.getString("activeStatus");
-		
+		String page = obj.getString("page");
+		String rows = obj.getString("rows");
 		if(StringUtils.isEmpty(token)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
 		
-		Map<String,String> map = new HashMap<>();
+		//整合参数
+		//role,companyName,page,rows
+		Company company = companyService.selectByPrimaryKey(tokenCompany.getCompanyId());
+		Uroles role = uusersRolesService.SelectRoleByUserId(accessUser.getUserId(), tokenCompany.getCompanyId());
+		if(StringUtils.isEmpty(page)){
+			page="1";
+		}
+		if(StringUtils.isEmpty(rows)){
+			rows="10000";
+		}
+		params.put("role", role.getRolename());
+		params.put("companyName", company.getCompany_name());
+		params.put("deviceName", deviceName);
+		params.put("deviceId", deviceId);
+		params.put("isOnline", isOnline);
+		params.put("activeStatus", activeStatus);
+		params.put("page", page);
+		params.put("rows", rows);
+		result = doorService.findDeviceInformation(params, headers);
+		/*Map<String,String> map = new HashMap<>();
 		map.put("is_online", "在线");
 		map.put("company_id", "A4F5A833EE674AE6B85F5582CCB3550D");
 		map.put("device_place", "无敌的乐山新村");
@@ -305,7 +360,7 @@ public class DoorController {
 		
 		result.put("data",JSON.toJSON(map));
 		result.put("returnCode", "3000");
-		result.put("message","数据请求成功");
+		result.put("message","数据请求成功");*/
 		return result;
 	}
 	/**
@@ -324,14 +379,33 @@ public class DoorController {
 		String deviceId = obj.getString("deviceId");
 		String doorId = obj.getString("doorId");
 		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(cdoorName)||StringUtils.isEmpty(deviceId)||StringUtils.isEmpty(doorId)){
+		if(StringUtils.isEmpty(token)
+				||StringUtils.isEmpty(cdoorName)
+				||StringUtils.isEmpty(deviceId)
+				||StringUtils.isEmpty(doorId)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
-		
-		result.put("returnCode", "3000");
-		result.put("message","数据请求成功");
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		String json = doorService.updateDoor(objectString, headers);
+		result = JSON.parseObject(json, Map.class);
+		/*result.put("returnCode", "3000");
+		result.put("message","数据请求成功");*/
 		return result;
 	}
 	/**
@@ -342,7 +416,8 @@ public class DoorController {
 	 */
 	@RequestMapping(value="/record/getInOutRecord",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> getInOutRecord(@RequestBody String objectString,HttpServletRequest request){
-		Map<String,Object> result = new HashMap<>();
+		Map<String,Object> result = new HashMap<String,Object>();
+		Map<String,String> params = new HashMap<String,String>();
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
@@ -352,16 +427,39 @@ public class DoorController {
 		String recordTime = obj.getString("recordTime");
 		String page = obj.getString("page");
 		String rows = obj.getString("rows");
-		String companyId = obj.getString("companyId");
 		String deviceName = obj.getString("deviceName");
-		
+		if(StringUtils.isEmpty(empName)) params.put("empName", empName);
+		if(StringUtils.isEmpty(dept)) params.put("dept", dept);
+		if(StringUtils.isEmpty(recordType)) params.put("recordType", recordType);
+		if(StringUtils.isEmpty(recordTime)) params.put("recordTime", recordTime);
+		if(StringUtils.isEmpty(page)) params.put("page", page);
+		if(StringUtils.isEmpty(rows)) params.put("rows", rows);
+		if(StringUtils.isEmpty(deviceName)) params.put("deviceName", deviceName);
 		if(StringUtils.isEmpty(token)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
-		
-		Map<String,Object> map = new HashMap<>();
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		String companyId = tokenCompany.getCompanyId();
+		if(StringUtils.isEmpty(companyId)) params.put("companyId", companyId);
+		String json = doorService.updateDoor(params, headers);
+		result = JSON.parseObject(json, Map.class);
+		/*Map<String,Object> map = new HashMap<>();
 		map.put("deviceId","161a21d4e6fd3cb8-1-2-bf9b");
 		map.put("deviceName","5e4b哈哈哈");
 		map.put("isHistoryDevice","0");
@@ -374,7 +472,7 @@ public class DoorController {
 		result.put("pagecountNum", "1");
 		result.put("totalPages", "5");
 		result.put("returnCode", "3000");
-		result.put("message","数据请求成功");
+		result.put("message","数据请求成功");*/
 		return result;
 	}
 	/**
@@ -426,9 +524,24 @@ public class DoorController {
 			result.put("message","必传参数为空");
 			return result;
 		}
-		
-		result.put("returnCode", "3000");
-		result.put("message","已执行下发门禁设置操作");
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		result = doorService.handOutDoorFeaturesSetup(objectString, headers);
+		/*result.put("returnCode", "3000");
+		result.put("message","已执行下发门禁设置操作");*/
 		return result;
 	}
 	/**
@@ -445,13 +558,28 @@ public class DoorController {
 		JSONObject obj = JSON.parseObject(objectString);
 		String doorId = obj.getString("doorId");
 		
-		if(StringUtils.isEmpty(token)){
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(doorId)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
-		
-		Map<String,String> dmap =new HashMap<>();
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		result = doorService.getHighSettingForFunction(objectString, headers);
+		/*Map<String,String> dmap =new HashMap<>();
 		dmap.put("calendarDate","2017-11-30");
 		dmap.put("doorId","17");
 		dmap.put("weatherOpenDoor","1");
@@ -501,7 +629,7 @@ public class DoorController {
 		
 		result.put("data",JSON.toJSON(map));
 		result.put("returnCode", "3000");
-		result.put("message","已执行下发门禁设置操作");
+		result.put("message","已执行下发门禁设置操作");*/
 		return result;
 	}
 	/**
@@ -518,14 +646,29 @@ public class DoorController {
 		JSONObject obj = JSON.parseObject(objectString);
 		String doorId = obj.getString("doorId");
 		
-		if(StringUtils.isEmpty(token)){
+		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(doorId)){
 			result.put("returnCode", "3006");
 			result.put("message","必传参数为空");
 			return result;
 		}
-		
-		result.put("returnCode", "3000");
-		result.put("message","操作成功");
+		//判断token是否有有效
+		boolean compareTime = tokenCompanyService.CompareTime(token);
+		if(!compareTime){
+			result.put("returnCode", "3014");
+			result.put("message","token验证失败");
+			return result;
+		}
+		//获取公司id
+		TokenCompany tokenCompany = tokenCompanyService.selectByToken(token);
+		// 查看当前管理员及历史管理员
+		UusersRolesKey accessUser = uusersRolesService.SelectAdministrator(tokenCompany.getCompanyId(),new Uroles().admin_role);
+		//设置请求头参数
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("companyId", tokenCompany.getCompanyId());
+		headers.put("accessUserId", accessUser.getUserId());
+		result = doorService.delDoor(objectString, headers);
+		/*result.put("returnCode", "3000");
+		result.put("message","操作成功");*/
 		return result;
 	}
 	
