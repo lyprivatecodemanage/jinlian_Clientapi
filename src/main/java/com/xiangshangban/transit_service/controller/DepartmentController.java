@@ -51,7 +51,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
+		String token = request.getHeader("token");
 		String departmentName = jobj.getString("departmentName");
 		String departmentParentId = jobj.getString("departmentParentId");
 		params.add(token);
@@ -91,14 +91,8 @@ public class DepartmentController {
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("data",json.get("data"));
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json ;
+			
 			return result;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -130,7 +124,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token =jobj.getString("token");
+		String token = request.getHeader("token");
 		String departmentName = jobj.getString("departmentName");//部门名称
 		String departmentParentId = jobj.getString("departmentParentId");//上级部门ID
 		String employeeId = jobj.getString("employeeId");//部门负责人ID
@@ -168,6 +162,7 @@ public class DepartmentController {
 			dateMap.put("employeeId", departmentParentId);
 			dateMap.put("departmentId", departmentParentId);
 			dateMap.put("departmentParentId", departmentParentId);
+			dateMap.put("departmentDescribe", departmentDescribe);
 			
 			String url = PropertiesUtils.pathUrl("organization");
 			
@@ -175,13 +170,8 @@ public class DepartmentController {
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json ;
+			
 			return result;
 
 		} catch (IOException e) {
@@ -208,7 +198,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
+		String token = request.getHeader("token");
 		String departmentId = jobj.getString("departmentId");//部门ID
 		params.add(token);
 		params.add(departmentId);
@@ -242,15 +232,9 @@ public class DepartmentController {
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json ;
+			
 			return result;
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -275,7 +259,7 @@ public class DepartmentController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
+		String token = request.getHeader("token");
 		String departmentId = jobj.getString("departmentId");//部门ID
 		params.add(token);
 		params.add(departmentId);
@@ -308,16 +292,9 @@ public class DepartmentController {
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("data",json.get("data"));
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json ;
+			
 			return result;
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

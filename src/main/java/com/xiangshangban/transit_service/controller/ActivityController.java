@@ -1,5 +1,6 @@
 package com.xiangshangban.transit_service.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.entity.ContentType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,13 +20,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xiangshangban.transit_service.bean.TokenCompany;
+import com.xiangshangban.transit_service.bean.Uroles;
+import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.TokenCompanyService;
+import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
+import com.xiangshangban.transit_service.utils.HttpClientUtil;
+import com.xiangshangban.transit_service.utils.PropertiesUtils;
 
 @RestController
 @RequestMapping("/ActivityController")
 public class ActivityController {
 	private SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat hourSdf = new SimpleDateFormat("mm:ss");
+	
+	@Autowired
+	TokenCompanyService tokenCompanyService;
+	
+	@Autowired
+	UusersRolesService uusersRolesService;
 	
 	/**
 	 * 4.1新增主题
@@ -76,14 +92,46 @@ public class ActivityController {
 			result.put("returnCode", "9999");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "操作成功");
-			result.put("returnCode", "3000");
-			result.put("templateId", "12358555");//添加成功时返回主题ID
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			// 查看当前管理员及历史管理员
+			UusersRolesKey list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",list.getUserId());
+			
+			Map<String,String> dateMap = new HashMap<>();
+			
+			String url = PropertiesUtils.pathUrl("device");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/insertEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			result = json;
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
