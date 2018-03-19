@@ -160,7 +160,8 @@ public class DoorController {
 		//设置请求头参数
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		rd = doorService.handOutEmployeePermission(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		rd = doorService.handOutEmployeePermission(params, headers);
 /*		String employeeId = obj.getString("employeeId");
 		String employeeName = obj.getString("employeeName");
 		String rangeDoorOpenType = obj.getString("rangeDoorOpenType");
@@ -216,7 +217,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		String json = doorService.getRelateEmpPermissionInfo(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		String json = doorService.getRelateEmpPermissionInfo(params, headers);
 		result = JSON.parseObject(json, Map.class);
 		/*Map<String,String> map = new HashMap<>();
 		map.put("day_of_week", "1");
@@ -274,7 +276,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		result= doorService.deleteEmployeeInformationDev(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		result= doorService.deleteEmployeeInformationDev(params, headers);
 		/*result.put("returnCode", "3000");
 		result.put("message","已执行删除设备上人员权限的操作");*/
 		return result;
@@ -375,12 +378,12 @@ public class DoorController {
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
-		String cdoorName = obj.getString("cdoorName");
+		String doorName = obj.getString("doorName");
 		String deviceId = obj.getString("deviceId");
 		String doorId = obj.getString("doorId");
 		
 		if(StringUtils.isEmpty(token)
-				||StringUtils.isEmpty(cdoorName)
+				||StringUtils.isEmpty(doorName)
 				||StringUtils.isEmpty(deviceId)
 				||StringUtils.isEmpty(doorId)){
 			result.put("returnCode", "3006");
@@ -402,7 +405,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		String json = doorService.updateDoor(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		String json = doorService.updateDoor(params, headers);
 		result = JSON.parseObject(json, Map.class);
 		/*result.put("returnCode", "3000");
 		result.put("message","数据请求成功");*/
@@ -457,8 +461,8 @@ public class DoorController {
 		headers.put("accessUserId", accessUser.getUserId());
 		String companyId = tokenCompany.getCompanyId();
 		if(StringUtils.isEmpty(companyId)) params.put("companyId", companyId);
-		String json = doorService.updateDoor(params, headers);
-		result = JSON.parseObject(json, Map.class);
+		result = doorService.getInOutRecord(params, headers);
+		//result = JSON.parseObject(json, Map.class);
 		/*Map<String,Object> map = new HashMap<>();
 		map.put("deviceId","161a21d4e6fd3cb8-1-2-bf9b");
 		map.put("deviceName","5e4b哈哈哈");
@@ -539,7 +543,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		result = doorService.handOutDoorFeaturesSetup(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		result = doorService.handOutDoorFeaturesSetup(params, headers);
 		/*result.put("returnCode", "3000");
 		result.put("message","已执行下发门禁设置操作");*/
 		return result;
@@ -578,7 +583,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		result = doorService.getHighSettingForFunction(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		result = doorService.getHighSettingForFunction(params, headers);
 		/*Map<String,String> dmap =new HashMap<>();
 		dmap.put("calendarDate","2017-11-30");
 		dmap.put("doorId","17");
@@ -666,7 +672,8 @@ public class DoorController {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("companyId", tokenCompany.getCompanyId());
 		headers.put("accessUserId", accessUser.getUserId());
-		result = doorService.delDoor(objectString, headers);
+		Map<String,Object> params = JSON.parseObject(objectString, Map.class);
+		result = doorService.delDoor(params, headers);
 		/*result.put("returnCode", "3000");
 		result.put("message","操作成功");*/
 		return result;
