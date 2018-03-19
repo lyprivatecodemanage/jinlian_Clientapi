@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.Employee;
 import com.xiangshangban.transit_service.bean.Post;
 import com.xiangshangban.transit_service.bean.TokenCompany;
 import com.xiangshangban.transit_service.bean.Uroles;
 import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.EmployeeService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
@@ -41,6 +43,9 @@ public class EmployeeController {
 	@Autowired
 	UusersRolesService uusersRolesService;
 	
+	@Autowired
+	EmployeeService employeeService;
+	
 	/**
 	 * 添加人员
 	 * @param jsonString
@@ -49,7 +54,7 @@ public class EmployeeController {
 	 */
 	@RequestMapping(value = "/insertEmployee",produces="application/json;charset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> insertEmployee(@RequestBody String jsonString,HttpServletRequest request){
-		Map<String,Object> result = new HashMap<String,Object>();
+		Map<String,Object> result = new HashMap<>();
 		List<String> params = new ArrayList<String>();
 		if(StringUtils.isEmpty(jsonString)){
 			result.put("returnCode", "3006");
@@ -57,7 +62,7 @@ public class EmployeeController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
+		String token = request.getHeader("token");
 		String employeeName = jobj.getString("employeeName");//姓名
 		String loginName = jobj.getString("loginName");//员工登录手机号
 		String departmentId = jobj.getString("departmentId");//所属部门id，没有传参时，默认在全公司下
@@ -106,14 +111,8 @@ public class EmployeeController {
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("data",json.get("data"));
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json;
+			
 			return result;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -144,17 +143,17 @@ public class EmployeeController {
 			return result;
 		}
 		JSONObject jobj = JSON.parseObject(jsonString);
-		String token = jobj.getString("token");
-		String companyName = jobj.getString("companyName");//当前组织机构（公司名称）
-		String departmentName = jobj.getString("departmentName");//部门名称（模糊查询）
-		String departmentPrincipal = jobj.getString("departmentPrincipal");//部门负责人（模糊查询）
-		String pageNum = jobj.getString("pageNum");//整数，页码，默认为1
-		String pageRecordNum = jobj.getString("pageRecordNum");//整数，每页记录数，默认为10
+		String token = request.getHeader("token");
+		String employeeName = jobj.getString("employeeName");//员工姓名
+		String employeeSex = jobj.getString("employeeSex");//员工性别
+		String departmentName = jobj.getString("departmentName");//部门名称（模糊查询）  
+		String postName = jobj.getString("postName");//岗位名称
+		String employeeStatus = jobj.getString("employeeStatus");//员工状态
+		String pageNum = StringUtils.isEmpty(jobj.getString("pageNum"))?"1":jobj.getString("pageNum");//整数，页码，默认为1
+		String pageRecordNum = StringUtils.isEmpty(jobj.getString("pageRecordNum"))?"10":jobj.getString("pageRecordNum");//整数，每页记录数，默认为10
 		String departmentId = jobj.getString("departmentId");//部门ID （该字段为确定查询，非模糊查询）
 		params.add(token);
-		params.add(companyName);
-		params.add(departmentName);
-		params.add(departmentPrincipal);
+		params.add(employeeStatus);
 		params.add(pageNum);
 		params.add(pageRecordNum);
 		params.add(departmentId);
@@ -176,35 +175,31 @@ public class EmployeeController {
 		try {
 			TokenCompany tc = tokenCompanyService.selectByToken(token);
 			
-			// 查看当前管理员及历史管理员
 			UusersRolesKey accessUserId = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
 			
 			Map<String,String> hmap = new HashMap<>();
 			hmap.put("companyId", tc.getCompanyId());
 			hmap.put("accessUserId",accessUserId.getUserId());
+			hmap.put("type","0");
 			
 			Map<String,String> dateMap = new HashMap<>();
-			dateMap.put("companyName",companyName);
+			dateMap.put("employeeName",employeeName);
+			dateMap.put("employeeSex",employeeSex);
 			dateMap.put("departmentName",departmentName);
-			dateMap.put("departmentPrincipal",departmentPrincipal);
+			dateMap.put("postName",postName);
+			dateMap.put("employeeStatus",employeeStatus);
 			dateMap.put("pageNum",pageNum);
 			dateMap.put("pageRecordNum",pageRecordNum);
 			dateMap.put("departmentId",departmentId);
 			
 			String url = PropertiesUtils.pathUrl("organization");
 			
-			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/insertEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/selectByAllFnyeEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
 			
 			JSONObject json = JSONObject.parseObject(code);
 			
-			if(json.getString("returnCode").equals("3000")){
-				result.put("data",json.get("data"));
-				result.put("returnCode", "3000");
-				result.put("message", "数据请求成功");
-				return result;
-			}
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
+			result = json;
+			
 			return result;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -242,8 +237,8 @@ public class EmployeeController {
 		String loginName = jobj.getString("loginName");//（必传）	登录名
 		String employeePhone = jobj.getString("employeePhone");//联系方式1
 		String employeeTwophone = jobj.getString("employeeTwophone");//联系方式2
-		String postId = jobj.getString("postId");//（必传）	主岗位id
-		String workAddress = jobj.getString("workAddress");//（必传）	工作地
+		String postId = jobj.getString("postId");//	主岗位id
+		String workAddress = jobj.getString("workAddress");//工作地
 		String marriageStatus = jobj.getString("marriageStatus");//婚姻状况
 		String seniorit = jobj.getString("seniorit");//（必传）	工龄
 		String departmentId = jobj.getString("departmentId");//（必传）	部门id
@@ -252,16 +247,23 @@ public class EmployeeController {
 		String entryTime = jobj.getString("entryTime");//（必传）	入职时间
 		String probationaryExpired = jobj.getString("probationaryExpired");//（必传）	试用到期日
 		String transferJobCause = jobj.getString("transferJobCause");//调动原因
-		List<Post> postList = JSON.parseArray(jobj.getString("postList"), Post.class);//副岗位;数据类型:数组
+		List<Post> postList = new ArrayList<>();
+		Post p1 = new Post();
+		p1.setDepartmentId(departmentId);
+		p1.setPostGrades("1");
+		postList.add(p1);
+		Post p2 = new Post();
+		p2.setPostGrades("0");
+		postList.add(p2);
+		Post p3 = new Post();
+		p3.setPostGrades("0");
+		postList.add(p3);
 		params.add(token);
 		params.add(employeeId);
 		params.add(employeeName);
-		params.add(employeeSex);
 		params.add(loginName);
-		params.add(postId);
-		params.add(workAddress);
-		params.add(seniorit);
 		params.add(departmentId);
+		params.add(seniorit);
 		params.add(entryTime);
 		params.add(probationaryExpired);
 		boolean isEmpty = EmptyUtil.isEmpty(params);
@@ -270,16 +272,67 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "数据请求成功");
-			result.put("returnCode", "3000");
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
 			return result;
 		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			UusersRolesKey accessUserId = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",accessUserId.getUserId());
+			hmap.put("type","0");
+			
+			Map<String,Object> dateMap = new HashMap<>();
+			dateMap.put("employeeId",employeeId);
+			dateMap.put("employeeName",employeeName);
+			dateMap.put("employeeSex",employeeSex);
+			dateMap.put("loginName",loginName);
+			dateMap.put("employeePhone",employeePhone);
+			dateMap.put("employeeTwophone",employeeTwophone);
+			dateMap.put("postId",postId);
+			dateMap.put("workAddress",workAddress);
+			dateMap.put("marriageStatus",marriageStatus);
+			dateMap.put("seniorit",seniorit);
+			dateMap.put("departmentId",departmentId);
+			dateMap.put("employeeNo",employeeNo);
+			dateMap.put("directPersonId",directPersonId);
+			dateMap.put("entryTime",entryTime);
+			dateMap.put("probationaryExpired",probationaryExpired);
+			dateMap.put("transferJobCause",transferJobCause);
+			dateMap.put("postList",postList);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/updateEmployeeInformation",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			result = json;
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		}
 	}
+	
 	/**
 	 * 人员信息删除（离职）
 	 * @param jsonString
@@ -295,24 +348,60 @@ public class EmployeeController {
 			result.put("message", "必传参数为空");
 			return result;
 		}
-		JSONObject jobj = JSON.parseObject(jsonString);
 		String token = request.getHeader("token");
-		String employeeId = jobj.getString("employeeId");//人员ID（必传）   
+		JSONArray jsonArray = JSON.parseObject(jsonString).getJSONArray("deleteData");
 		params.add(token);
-		params.add(employeeId);
 		boolean isEmpty = EmptyUtil.isEmpty(params);
 		if(!isEmpty){
 			result.put("message", "必传参数为空");
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "数据请求成功");
-			result.put("returnCode", "3000");
+		if(jsonArray.size()==0){
+			result.put("message", "必传参数为空");
+			result.put("returnCode", "3006");
 			return result;
-		}else{
+		}
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			UusersRolesKey accessUserId = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",accessUserId.getUserId());
+			hmap.put("type","0");
+			
+			Map<String,Object> dateMap = new HashMap<>();
+			dateMap.put("deleteData",jsonArray);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/deleteActivity",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			result = json;
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
@@ -342,38 +431,47 @@ public class EmployeeController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			Employee employee = new Employee();
-			List<Post> postList = new ArrayList<Post>();
-			Post post1 = new Post();
-			post1.setPostName("");// 副岗位名称
-			Post post2 = new Post();
-			post2.setPostName("");// 副岗位名称
-			postList.add(post1);
-			postList.add(post1);
-			employee.setPostList(postList);
-			employee.setEmployeeId("");//员工id
-			employee.setEmployeeName("");//员工姓名
-			employee.setEmployeeSex("");//员工性别
-			employee.setLoginName("");//登录名
-			employee.setEmployeePhone("");//联系方式1
-			employee.setEmployeeTwophone("");//联系方式2
-			employee.setPostName("");//主岗位名称
-			employee.setDepartmentName("");//部门名称
-			employee.setEmployeeNo("");//员工编号
-			employee.setDirectPersonName("");//直接汇报人姓名
-			employee.setEntryTime("");//入职时间
-			employee.setProbationaryExpired("");//转正时间
-			employee.setWorkAddress("");//工作地
-			employee.setMarriageStatus("");//婚姻状况(0:未婚,1:已婚)
-			employee.setSeniority("");//工龄
-			result.put("message", "数据请求成功");
-			result.put("returnCode", "3000");
-			result.put("data", employee);
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			UusersRolesKey accessUserId = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			
+			Map<String,String> hmap = new HashMap<>();
+			hmap.put("companyId", tc.getCompanyId());
+			hmap.put("accessUserId",accessUserId.getUserId());
+			hmap.put("type","0");
+			
+			Map<String,Object> dateMap = new HashMap<>();
+			dateMap.put("employeeId",employeeId);
+			
+			String url = PropertiesUtils.pathUrl("organization");
+			
+			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/search",dateMap,ContentType.APPLICATION_JSON, hmap);
+			
+			JSONObject json = JSONObject.parseObject(code);
+			
+			result = json;
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
