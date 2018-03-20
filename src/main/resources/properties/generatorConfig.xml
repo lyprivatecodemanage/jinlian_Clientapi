@@ -14,7 +14,7 @@
     <jdbcConnection connectionURL="jdbc:postgresql://192.168.0.242:5432/xiangshangban2_0" 
     driverClass="org.postgresql.Driver" 
     password="jinnian-123abc" 
-    userId="attendance" />
+    userId="device" />
     
     <javaTypeResolver>  
             <property name="forceBigDecimals" value="false" />  
@@ -33,7 +33,7 @@
     	<property name="enableSubPackages" value="false" />
     </javaClientGenerator>
     
-    <table tableName="token_company"  domainObjectName="TokenCompany">
+    <table tableName="image_"  domainObjectName="Image">
     </table>
   </context>
 </generatorConfiguration>

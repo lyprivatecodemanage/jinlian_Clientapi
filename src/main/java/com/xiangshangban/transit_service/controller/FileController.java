@@ -24,8 +24,8 @@ import com.xiangshangban.transit_service.utils.HttpClientUtil;
 import com.xiangshangban.transit_service.utils.RedisUtil;
 
 @RestController
-@RequestMapping("/OssController")
-public class OssController {
+@RequestMapping("/FileController")
+public class FileController {
 
 	@Autowired
 	UusersService uusersService;
@@ -46,7 +46,7 @@ public class OssController {
 	 * @param funcDirectory 存储模块名称
 	 * @return
 	 */
-	@RequestMapping(value = "/upload",method=RequestMethod.POST)
+	@RequestMapping(value = "/uploadItem",method=RequestMethod.POST)
 	public ReturnData appUpload(@RequestParam("file")MultipartFile file,HttpServletRequest request){ 
 		ReturnData returnData = new ReturnData();
 		

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.TokenCompany;
 import com.xiangshangban.transit_service.bean.Uroles;
 import com.xiangshangban.transit_service.bean.UusersRolesKey;
+import com.xiangshangban.transit_service.service.BackgroundImageTemplateService;
+import com.xiangshangban.transit_service.service.CompanyService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
@@ -36,11 +39,19 @@ public class ActivityController {
 	private SimpleDateFormat hourSdf = new SimpleDateFormat("mm:ss");
 	
 	@Autowired
+	BackgroundImageTemplateService backgroundImageTemplateService;
+	
+	@Autowired
 	TokenCompanyService tokenCompanyService;
 	
 	@Autowired
 	UusersRolesService uusersRolesService;
 	
+	@Autowired
+	CompanyService companyService;
+	
+	@Value("${ossUrl}")
+	String url;
 	/**
 	 * 4.1新增主题
 	 * @param jsonString
@@ -65,7 +76,7 @@ public class ActivityController {
 		String broadStartTime = jobj.getString("broadStartTime");//开始时间
 		String broadEndTime = jobj.getString("broadEndTime");//结束时间
 		String roastingTime = jobj.getString("roastingTime");//轮播时间间隔 ，单位为秒
-		String doorId = jobj.getString("doorId");//门ID
+		String deviceId = jobj.getString("deviceId");//门ID
 		params.add(token);
 		params.add(templateLevel);
 		params.add(imageKey);
@@ -74,7 +85,7 @@ public class ActivityController {
 		params.add(broadStartTime);
 		params.add(broadEndTime);
 		params.add(roastingTime);
-		params.add(doorId);
+		params.add(deviceId);
 		boolean isEmpty = EmptyUtil.isEmpty(params);
 		if(!isEmpty){
 			result.put("message", "必传参数为空");
@@ -104,29 +115,12 @@ public class ActivityController {
 		try {
 			TokenCompany tc = tokenCompanyService.selectByToken(token);
 			
-			// 查看当前管理员及历史管理员
-			UusersRolesKey list = uusersRolesService.SelectAdministrator(tc.getCompanyId(),new Uroles().admin_role);
+			String companyNo = companyService.selectByPrimaryKey(tc.getCompanyId()).getCompany_no();//公司编号，此编号实际应用时，应根据token去查询
+			//该公司完整oss路径
+			String sendUrl = url+companyNo+"deviceItme";
 			
-			Map<String,String> hmap = new HashMap<>();
-			hmap.put("companyId", tc.getCompanyId());
-			hmap.put("accessUserId",list.getUserId());
+			result = backgroundImageTemplateService.addTask(templateLevel, imageKey, broadStartDate, broadEndDate, broadStartTime, broadEndTime, roastingTime, deviceId, sendUrl,tc.getCompanyId());
 			
-			Map<String,String> dateMap = new HashMap<>();
-			
-			String url = PropertiesUtils.pathUrl("device");
-			
-			String code = HttpClientUtil.sendRequet(url+"/EmployeeController/insertEmployee",dateMap,ContentType.APPLICATION_JSON, hmap);
-			
-			JSONObject json = JSONObject.parseObject(code);
-			
-			result = json;
-			
-			return result;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			result.put("returnCode", "3001");
-			result.put("message", "服务器错误");
 			return result;
 		} catch (Exception e){
 			e.printStackTrace();
@@ -186,13 +180,23 @@ public class ActivityController {
 			result.put("returnCode", "9999");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "操作成功");
-			result.put("returnCode", "3000");
-			return result;
-		}else{
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			result = backgroundImageTemplateService.updateTask(templateId,templateLevel, imageKey, broadStartDate, broadEndDate, broadStartTime, broadEndTime, roastingTime);
+			
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
 			return result;
 		}
 	}
@@ -222,81 +226,105 @@ public class ActivityController {
 			result.put("returnCode", "3006");
 			return result;
 		}
-		if(TokenController.Token.equals(token)){
-			result.put("message", "操作成功");
-			result.put("returnCode", "3000");
-			return result;
-		}else{
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
 			result.put("message", "token验证失败");
 			result.put("returnCode", "9999");
 			return result;
 		}
-	}
-	@RequestMapping(value="/getTaskById",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
-	public Map<String,Object> getTaskById(@RequestBody String objectString,HttpServletRequest request){
-		Map<String,Object> map = new HashMap<String, Object>();
 		
-		String token = request.getHeader("token");
-		JSONObject obj = JSON.parseObject(objectString);
-		String templateId = obj.getString("templateId");
-		
-		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(templateId)){
-			map.put("returnCode","3006");
-			map.put("message","必传参数为空");
-			return map;
+		try {
+			result = backgroundImageTemplateService.deleteTask(templateId);
+			
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
 		}
-		
-		Map<String,String> resultmap = new HashMap<String,String>();
-		resultmap.put("templateId", "655786545");
-		resultmap.put("templateLevel ", "0");
-		resultmap.put("imagePath", "http://www.oa.smy.com/123.png");
-		resultmap.put("imageKey", "kfjkasjkasj.png");
-		resultmap.put("broadStartDate", "2017-10-27");
-		resultmap.put("broadEndDate", "2017-10-27");
-		resultmap.put("broadStartTime", "09:00");
-		resultmap.put("broadEndTime", "18:00");
-		resultmap.put("roastingTime", "3");
-		resultmap.put("doorId", "123");
-		
-		map.put("data",JSON.toJSON(resultmap));
-		map.put("returnCode","3000");
-		map.put("message","操作成功");
-		return map;
 	}
 	
-	@RequestMapping(value="/getTaskAll",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
-	public Map<String,Object> getTaskAll(@RequestBody String objectString,HttpServletRequest request){
-		Map<String,Object> map = new HashMap<String, Object>();
+	/**
+	 * 根据ID查询任务
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="/getTaskById",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
+	public Map<String,Object> getTaskById(@RequestBody String objectString,HttpServletRequest request){
+		Map<String,Object> result = new HashMap<String, Object>();
 		
 		String token = request.getHeader("token");
 		JSONObject obj = JSON.parseObject(objectString);
 		String templateId = obj.getString("templateId");
 		
 		if(StringUtils.isEmpty(token)||StringUtils.isEmpty(templateId)){
+			result.put("returnCode","3006");
+			result.put("message","必传参数为空");
+			return result;
+		}
+		
+		boolean b = tokenCompanyService.CompareTime(token);
+		
+		if(!b){
+			result.put("message", "token验证失败");
+			result.put("returnCode", "9999");
+			return result;
+		}
+		
+		try {
+			result = backgroundImageTemplateService.getTaskById(templateId);
+			
+			return result;
+		} catch (Exception e){
+			e.printStackTrace();
+			result.put("returnCode", "3001");
+			result.put("message", "服务器错误");
+			return result;
+		}
+	}
+	
+	/**
+	 * 查询所有任务
+	 * @param objectString
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="/getTaskAll",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
+	public Map<String,Object> getTaskAll(HttpServletRequest request){
+		Map<String,Object> map = new HashMap<String, Object>();
+		
+		String token = request.getHeader("token");
+		
+		if(StringUtils.isEmpty(token)){
 			map.put("returnCode","3006");
 			map.put("message","必传参数为空");
 			return map;
 		}
 		
-		Map<String,String> resultmap = new HashMap<String,String>();
-		resultmap.put("templateId", "655786545");
-		resultmap.put("templateLevel ", "0");
-		resultmap.put("imagePath", "http://www.oa.smy.com/123.png");
-		resultmap.put("imageKey", "kfjkasjkasj.png");
-		resultmap.put("broadStartDate", "2017-10-27");
-		resultmap.put("broadEndDate", "2017-10-27");
-		resultmap.put("broadStartTime", "09:00");
-		resultmap.put("broadEndTime", "18:00");
-		resultmap.put("roastingTime", "3");
-		resultmap.put("doorId", "123");
 		
-		List<Map<String,String>> list = new ArrayList<>();
-		list.add( resultmap);
+		boolean b = tokenCompanyService.CompareTime(token);
 		
-		map.put("data",JSON.toJSON(list));
-		map.put("returnCode","3000");
-		map.put("message","操作成功");
-		return map;
+		if(!b){
+			map.put("message", "token验证失败");
+			map.put("returnCode", "9999");
+			return map;
+		}
+		
+		try {
+			TokenCompany tc = tokenCompanyService.selectByToken(token);
+			
+			map = backgroundImageTemplateService.getTaskAll(tc.getCompanyId());
+			
+			return map;
+		} catch (Exception e){
+			e.printStackTrace();
+			map.put("returnCode", "3001");
+			map.put("message", "服务器错误");
+			return map;
+		}
 	}
 	
 	@RequestMapping(value="/addVisitCardEmp",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
