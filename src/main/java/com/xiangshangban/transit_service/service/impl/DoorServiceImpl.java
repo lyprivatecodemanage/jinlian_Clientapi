@@ -30,7 +30,7 @@ public class DoorServiceImpl implements DoorService{
 		Map<String, Object> result = new HashMap<String ,Object>();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EntranceGuardController")+PropertiesUtils.pathUrl("addDoor");
+			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EntranceGuardController").trim()+PropertiesUtils.pathUrl("addDoor");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");
@@ -72,7 +72,9 @@ public class DoorServiceImpl implements DoorService{
 		ReturnData rd = new ReturnData();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EntranceGuardController")+PropertiesUtils.pathUrl("handOutEmployeePermission");
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController")
+			+PropertiesUtils.pathUrl("getRelateEmpPermissionInfo");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");
@@ -108,7 +110,9 @@ public class DoorServiceImpl implements DoorService{
 		Map<String, Object> result = new HashMap<String ,Object>();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("DeviceController")+PropertiesUtils.pathUrl("findDeviceInformation");
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("DeviceController")
+					+PropertiesUtils.pathUrl("findDeviceInformation");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");
