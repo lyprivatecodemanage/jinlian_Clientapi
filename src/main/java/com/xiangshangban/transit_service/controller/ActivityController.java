@@ -1,6 +1,5 @@
 package com.xiangshangban.transit_service.controller;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -22,15 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.transit_service.bean.TokenCompany;
-import com.xiangshangban.transit_service.bean.Uroles;
-import com.xiangshangban.transit_service.bean.UusersRolesKey;
 import com.xiangshangban.transit_service.service.BackgroundImageTemplateService;
 import com.xiangshangban.transit_service.service.CompanyService;
 import com.xiangshangban.transit_service.service.TokenCompanyService;
 import com.xiangshangban.transit_service.service.UusersRolesService;
 import com.xiangshangban.transit_service.util.EmptyUtil;
-import com.xiangshangban.transit_service.utils.HttpClientUtil;
-import com.xiangshangban.transit_service.utils.PropertiesUtils;
 
 @RestController
 @RequestMapping("/ActivityController")
@@ -76,7 +70,7 @@ public class ActivityController {
 		String broadStartTime = jobj.getString("broadStartTime");//开始时间
 		String broadEndTime = jobj.getString("broadEndTime");//结束时间
 		String roastingTime = jobj.getString("roastingTime");//轮播时间间隔 ，单位为秒
-		String deviceId = jobj.getString("deviceId");//门ID
+		String deviceId = jobj.getString("deviceId");//设备ID
 		params.add(token);
 		params.add(templateLevel);
 		params.add(imageKey);
@@ -100,7 +94,7 @@ public class ActivityController {
 		} catch (ParseException e) {
 			e.printStackTrace();
 			result.put("message", "日期时间格式错误");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -108,7 +102,7 @@ public class ActivityController {
 		
 		if(!b){
 			result.put("message", "token验证失败");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -116,8 +110,9 @@ public class ActivityController {
 			TokenCompany tc = tokenCompanyService.selectByToken(token);
 			
 			String companyNo = companyService.selectByPrimaryKey(tc.getCompanyId()).getCompany_no();//公司编号，此编号实际应用时，应根据token去查询
+			
 			//该公司完整oss路径
-			String sendUrl = url+companyNo+"deviceItme";
+			String sendUrl = url+companyNo+"/deviceItme";
 			
 			result = backgroundImageTemplateService.addTask(templateLevel, imageKey, broadStartDate, broadEndDate, broadStartTime, broadEndTime, roastingTime, deviceId, sendUrl,tc.getCompanyId());
 			
@@ -177,7 +172,7 @@ public class ActivityController {
 		} catch (ParseException e) {
 			e.printStackTrace();
 			result.put("message", "日期时间格式错误");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -185,7 +180,7 @@ public class ActivityController {
 		
 		if(!b){
 			result.put("message", "token验证失败");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -230,7 +225,7 @@ public class ActivityController {
 		
 		if(!b){
 			result.put("message", "token验证失败");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -270,7 +265,7 @@ public class ActivityController {
 		
 		if(!b){
 			result.put("message", "token验证失败");
-			result.put("returnCode", "9999");
+			result.put("returnCode", "3014");
 			return result;
 		}
 		
@@ -309,7 +304,7 @@ public class ActivityController {
 		
 		if(!b){
 			map.put("message", "token验证失败");
-			map.put("returnCode", "9999");
+			map.put("returnCode", "3014");
 			return map;
 		}
 		
@@ -326,6 +321,8 @@ public class ActivityController {
 			return map;
 		}
 	}
+	
+	/*************************************************重复部分**************************************************************/
 	
 	@RequestMapping(value="/addVisitCardEmp",produces="application/json;chatset=utf-8",method=RequestMethod.POST)
 	public Map<String,Object> addVisitCardEmp(@RequestBody String objectString,HttpServletRequest request){

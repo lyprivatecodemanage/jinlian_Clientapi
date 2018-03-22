@@ -42,7 +42,7 @@
   </resultMap>
   
   <insert id="insertImage" parameterType="com.xiangshangban.transit_service.bean.Image">
-  	 insert into image_
+  	 insert into device.image_
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
         id,
@@ -92,12 +92,12 @@
   </insert>
   
   <update id="updateImage" parameterType="com.xiangshangban.transit_service.bean.Image">
-  	update image_ set img_name=#{imgName}
+  	update device.image_ set img_name=#{imgName}
   	where id = #{id}
   </update>
   
   <insert id="insertTemplate" parameterType="com.xiangshangban.transit_service.bean.Template">
-  	 insert into template_
+  	 insert into device.template_
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="templateId != null">
         template_id,
@@ -189,12 +189,12 @@
   </insert>
   
   <update id="updateTemplate" parameterType="com.xiangshangban.transit_service.bean.Template">
-  	update template_ set roasting_time = #{roastingTime},operate_time=#{operateTime}
+  	update device.template_ set roasting_time = #{roastingTime},operate_time=#{operateTime}
   	where template_id = #{templateId}
   </update>
   
   <insert id="insertBackgroundImageTemplate" parameterType="com.xiangshangban.transit_service.bean.BackgroundImageTemplate">
-  	 insert into background_image_template
+  	 insert into device.background_image_template
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
         id,
@@ -256,40 +256,44 @@
   </insert>
  
   <update id="updateBackgroundImageTemplate" parameterType="com.xiangshangban.transit_service.bean.BackgroundImageTemplate">
-  	update background_image_template set  broad_start_date=#{broadStartDate},broad_end_date=#{broadEndDate},broad_start_time=#{broadStartTime},broad_end_time=#{broadEndTime}
+  	update device.background_image_template set  broad_start_date=#{broadStartDate},broad_end_date=#{broadEndDate},broad_start_time=#{broadStartTime},broad_end_time=#{broadEndTime}
   	where template_id = #{templateId}
   </update>
  
   <select id="SelectByTemplateId" parameterType="java.lang.String" resultMap="BackgroundImageTemplateMap">
-  	select * from background_image_template
+  	select * from device.background_image_template
   	where template_id = #{templateId}
+  	and status = '0'
   </select>
  
-  <delete id="deleteImage" parameterType="java.lang.String">
-  	DELETE from image_ where id = #{id}
-  </delete>
+  <update id="deleteImage" parameterType="java.lang.String">
+  	update device.image_  set status = '1' where id = #{id}
+  </update>
  
-  <delete id="deleteTemplate" parameterType="java.lang.String">
-  	delete from template_ where template_id = #{id}
-  </delete>
+  <update id="deleteTemplate" parameterType="java.lang.String">
+  	update device.template_ set status = '1' where template_id = #{id}
+  </update>
  
-  <delete id="deleteBackgroundImageTemplate">
-  	delete from background_image_template where template_id = #{id}
-  </delete>
+  <update id="deleteBackgroundImageTemplate" parameterType="java.lang.String">
+  	update device.background_image_template set status = '1' where template_id = #{id}
+  </update>
  
-  <select id="SelectImageById" parameterType="java.lang.java" resultMap="ImageMap">
-  	 select * from image_
+  <select id="SelectImageById" parameterType="java.lang.String" resultMap="ImageMap">
+  	 select * from device.image_
   	 where id = #{id}
+  	 and status = '0'
   </select>
  
   <select id="SelectTemplateById" parameterType="java.lang.String" resultMap="TemplateMap">
-  	select * from template_
+  	select * from device.template_
   	where template_id = #{id}
+  	and status = '0'
   </select>
   
-  <select id="FindAllByCompanyId" parameterType="java.lanng.String" resultMap="BackgroundImageTemplateMap">
-  	select * from background_image_template
+  <select id="FindAllByCompanyId" parameterType="java.lang.String" resultMap="BackgroundImageTemplateMap">
+  	select * from device.background_image_template
   	where company_id = #{companyId}
+  	and status = '0'
   </select>
   
 </mapper>
