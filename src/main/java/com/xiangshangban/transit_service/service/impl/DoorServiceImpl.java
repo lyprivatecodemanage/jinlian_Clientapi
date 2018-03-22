@@ -30,7 +30,9 @@ public class DoorServiceImpl implements DoorService{
 		Map<String, Object> result = new HashMap<String ,Object>();
 		String url;
 		try {
-			url = PropertiesUtils.pathUrl("device")+PropertiesUtils.pathUrl("EntranceGuardController").trim()+PropertiesUtils.pathUrl("addDoor");
+			url = PropertiesUtils.pathUrl("device")
+					+PropertiesUtils.pathUrl("EntranceGuardController").trim()
+					+PropertiesUtils.pathUrl("addDoor");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new MyException("接口地址获取出错");

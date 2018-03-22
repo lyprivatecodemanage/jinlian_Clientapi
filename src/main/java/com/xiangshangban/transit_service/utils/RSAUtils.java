@@ -169,7 +169,7 @@ public class RSAUtils {
         return resultDatas;
     }
     public static void main (String[] args) throws Exception {
-        Map<String, String> keyMap = RSAUtils.createKeys(1024);
+       /* Map<String, String> keyMap = RSAUtils.createKeys(512);
         String  publicKey = keyMap.get("publicKey");
         String  privateKey = keyMap.get("privateKey");
         System.out.println("公钥: \n\r" + publicKey);
@@ -187,7 +187,8 @@ public class RSAUtils {
         System.out.println("\r明文大小：\r\n" + str.getBytes().length);
         String encodedData = RSAUtils.publicEncrypt(str, RSAUtils.getPublicKey(publicKey));
         System.out.println("密文：\r\n" + encodedData);
-        String decodedData = RSAUtils.privateDecrypt(encodedData, RSAUtils.getPrivateKey(privateKey));
+        String decodedData = RSAUtils.privateDecrypt(encodedData, RSAUtils.getPrivateKey(privateKey));*/
+    	String decodedData = RSAUtils.privateDecrypt("MUn4KHIEZSipscUQ8VstBqrsTiyOp1C1PXN-lpEEa6CfZ-Q15h2lzf4IdrsESZjSA2dBKNTBzhohLbY1nMkU4A", RSAUtils.getPrivateKey("MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEApcpYGbOXWhgRq6fhQr6I7QJiD08oVFiyIHYkyjoDvs3bY0VLu4iqctW233LaR2NXwawKRSprhghOcuw_cNULQwIDAQABAkEAorOdGjwBQM12KfurOZE7Vz2LdnK8pWoWBX1sRXoByvErSaD3m7t5rLmikBumIOV5G7cZ1BbKR-d66Tru32h54QIhAOwXsN4LY7XMOlWEeFadrwPJ4qvttkQiaLk021J0KXC_AiEAs8UbU1HILRdhgkYc3R9-D1eNi7RytiVAlbOK7lCogn0CIQCHDTJGgjtidlX0L1frLD4-K5E3ij5WEVzYfQzsyLgf3wIgHNkzsmI8YmgPIM3Jkf6cxy-AqnuxsOM3gw6F7AqLkC0CIDtvkNI1sC7pVQWLLe0D9SB0Gt6LaXmkpulichuKxvPp"));
         System.out.println("私钥解密后文字: \r\n" + decodedData);
 /*        String decodedDataPub = RSAUtils.publicDecrypt(encodedData, RSAUtils.getPublicKey(publicKey));
         System.out.println("公钥解密后文字: \r\n" + decodedDataPub);*/

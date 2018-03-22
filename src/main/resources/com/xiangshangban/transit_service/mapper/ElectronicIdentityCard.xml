@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.transit_service.dao.ElectronicIdentityCardMapper"> 
+	<resultMap type="com.xiangshangban.transit_service.bean.ElectronicIdentityCard" id="BaseResultMap">
+		<result column="company_id" property="companyId"/>
+		<result column="employee_id" property="employeeId"/>
+		<result column="valid_begin_time" property="validBeginTime"/>
+		<result column="valid_end_time" property="validEndTime"/>
+		<result column="visit_key" property="visitKey"/>
+		<result column="visit_format" property="visitFormat"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		company_id,employee_id,valid_begin_time,valid_end_time,visit_key,visit_format
+	</sql>
+	<select id="selectElectronicIdentityCard" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"/>
+		from device.electronic_identity_card
+		where company_id = #{companyId} and employee_id = #{employeeId}
+	</select>
+	
+	<insert id="insertSelective" parameterType="com.xiangshangban.transit_service.bean.ElectronicIdentityCard">
+		insert into device.electronic_identity_card
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+		 	<if test="companyId!=null">company_id,</if>
+		 	<if test="employeeId!=null">employee_id,</if>
+		 	<if test="validBeginTime!=null">valid_begin_time,</if>
+		 	<if test="validEndTime!=null">valid_end_time,</if>
+		 	<if test="visitKey!=null">visit_key,</if>
+		 	<if test="visitFormat!=null">visit_format,</if>
+		 </trim>
+		 <trim prefix="values(" suffix=")" suffixOverrides=",">
+		 	<if test="companyId!=null">#{companyId},</if>
+		 	<if test="employeeId!=null">#{employeeId},</if>
+		 	<if test="validBeginTime!=null">#{validBeginTime},</if>
+		 	<if test="validEndTime!=null">#{validEndTime},</if>
+		 	<if test="visitKey!=null">#{visitKey},</if>
+		 	<if test="visitFormat!=null">#{visitFormat},</if>
+		 </trim>
+	</insert>
+	<update id="updateElectronicIdentityCard" parameterType="com.xiangshangban.transit_service.bean.ElectronicIdentityCard">
+		update device.electronic_identity_card set
+		valid_begin_time = #{validBeginTime},
+		valid_end_time = #{validEndTime},
+		visit_key = #{visitKey},
+		visit_format = #{visitFormat}
+		where company_id = #{companyId} and employee_id = #{employeeId}
+	</update>
+</mapper>

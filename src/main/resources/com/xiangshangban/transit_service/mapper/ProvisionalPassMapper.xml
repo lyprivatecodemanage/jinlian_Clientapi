@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.transit_service.dao.ProvisionalPassMapper"> 
+	<resultMap type="com.xiangshangban.transit_service.bean.ProvisionalPass" id="BaseResultMap">
+		<result column="visit_id" property="visitId"/>
+		<result column="company_id" property="companyId"/>
+		<result column="employee_name" property="employeeName"/>
+		<result column="employee_company" property="employeeCompany"/>
+		<result column="valid_begin_time" property="validBeginTime"/>
+		<result column="valid_end_time" property="validEndTime"/>
+		<result column="door_list" property="doorList"/>
+		<result column="visit_key" property="visitKey"/>
+		<result column="visit_format" property="visitFormat"/>
+	</resultMap>
+	<select id="insertSelective" parameterType="com.xiangshangban.transit_service.bean.ProvisionalPass">
+		insert into device.provisional_pass
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+		 	<if test="visitId!=null">visit_id,</if>
+		 	<if test="companyId!=null">company_id,</if>
+		 	<if test="employeeName!=null">employee_name,</if>
+		 	<if test="employeeCompany!=null">employee_company,</if>
+		 	<if test="validBeginTime!=null">valid_begin_time,</if>
+		 	<if test="validEndTime!=null">valid_end_time,</if>
+		 	<if test="doorList!=null">door_list,</if>
+		 	<if test="visitKey!=null">visit_key,</if>
+		 	<if test="visitFormat!=null">visit_format,</if>
+		 </trim>
+		 <trim prefix="values(" suffix=")" suffixOverrides=",">
+		 	<if test="visitId!=null">#{visitId},</if>
+		 	<if test="companyId!=null">#{companyId},</if>
+		 	<if test="employeeName!=null">#{employeeName},</if>
+		 	<if test="employeeCompany!=null">#{employeeCompany},</if>
+		 	<if test="validBeginTime!=null">#{validBeginTime},</if>
+		 	<if test="validEndTime!=null">#{validEndTime},</if>
+		 	<if test="doorList!=null">#{doorList},</if>
+		 	<if test="visitKey!=null">#{visitKey},</if>
+		 	<if test="visitFormat!=null">#{visitFormat},</if>
+		 </trim>
+	</select>
+</mapper>
