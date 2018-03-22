@@ -2,19 +2,29 @@ package com.xiangshangban.transit_service.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.xiangshangban.transit_service.dao.DoorCmdMapper;
 import com.xiangshangban.transit_service.bean.BackgroundImageTemplate;
+import com.xiangshangban.transit_service.bean.DoorCmd;
 import com.xiangshangban.transit_service.bean.Image;
 import com.xiangshangban.transit_service.bean.Template;
+import com.xiangshangban.transit_service.bean.Theme;
 import com.xiangshangban.transit_service.dao.BackgroundImageTemplateMapper;
 import com.xiangshangban.transit_service.service.BackgroundImageTemplateService;
+import com.xiangshangban.transit_service.utils.CmdUtil;
 import com.xiangshangban.transit_service.utils.FormatUtil;
+import com.xiangshangban.transit_service.utils.RabbitMQSender;
 
 @Service("backgroundImageTemplateService")
 public class BackgroundImageTemplateServiceImpl implements BackgroundImageTemplateService {
@@ -24,16 +34,25 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 	@Autowired
 	BackgroundImageTemplateMapper backgroundImageTemplateMapper;
 	
+	@Autowired
+    DoorCmdMapper doorCmdMapper;
+	
+	@Value("${serverId}")
+    String serverId;
+	
 	@Override
 	public Map<String, Object> addTask(String templateLevel,String imageName,String broadStartDate,String broadEndDate,String broadStartTime,String broadEndTime,String roastingTime,
 			String deviceId,String sendUrl,String companyId) {
 		Map<String, Object> result = new HashMap<>();
-		
+		String resultCode;
+        String resultMessage;
+        
 		Image image = new Image();
 		image.setId(FormatUtil.createUuid());
 		image.setImgName(imageName);
 		image.setImgUrl(sendUrl);
 		image.setImgType("preview");
+		image.setStatus("0");
 		
 		int imageNum = backgroundImageTemplateMapper.insertImage(image);
 		
@@ -45,6 +64,7 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 			template.setOperateTime(sdf.format(new Date()));
 			template.setDeviceId(deviceId);
 			template.setRoastingTime(roastingTime);
+			template.setStatus("0");
 			
 			int bitNum  = backgroundImageTemplateMapper.insertTemplate(template);
 			
@@ -58,13 +78,61 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 				backgroundImageTemplate.setBroadEndDate(broadEndDate);
 				backgroundImageTemplate.setBroadEndTime(broadEndTime);
 				backgroundImageTemplate.setCompanyId(companyId);
+				backgroundImageTemplate.setStatus("0");
 				
 				int bgitNum = backgroundImageTemplateMapper.insertBackgroundImageTemplate(backgroundImageTemplate);
 				
 				if(bgitNum > 0){
+					Theme t = new Theme(template.getTemplateId(), template.getTemplateType(), templateLevel, imageName, sendUrl, "", "", "", broadStartDate, broadEndDate, broadStartTime, broadEndTime, roastingTime, "");
+					
+					Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+			        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+			        resultCode = "0";
+			        resultMessage = "执行成功";
+			        resultData.put("resultCode", resultCode);
+			        resultData.put("resultMessage", resultMessage);
+			        resultData.put("returnObj",t);
+			        resultMap.put("result", resultData);
+					
+					//构造命令格式
+			        DoorCmd doorCmdRecord = new DoorCmd();
+			        doorCmdRecord.setServerId(serverId);
+			        doorCmdRecord.setDeviceId(deviceId);
+			        doorCmdRecord.setFileEdition("v1.3");
+			        doorCmdRecord.setCommandMode("C");
+			        doorCmdRecord.setCommandType("S");
+			        doorCmdRecord.setCommandTotal("1");
+			        doorCmdRecord.setCommandIndex("1");
+			        doorCmdRecord.setSubCmdId("");
+			        doorCmdRecord.setAction("UPLOAD_DEVICE_REBOOT_RECORD");
+			        doorCmdRecord.setActionCode("1004");
+			        doorCmdRecord.setSendTime(sdf.format(new Date()));
+			        Calendar c = Calendar.getInstance();
+			        c.add(Calendar.SECOND, 300);
+			        doorCmdRecord.setOutOfTime(sdf.format(c.getTime()));
+			        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+			        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+			        //获取完整的数据加协议封装格式
+			        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+			        Map<String, Object> doorRecordAll =  CmdUtil.messagePackaging(doorCmdRecord, "", resultData, "C");
+			        //命令状态设置为: 已回复
+			        doorCmdRecord.setStatus("5");
+			        //设置md5校验值
+			        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+			        //设置数据库的data字段
+			        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+			        doorCmdRecord.setResultCode("3000");
+			        doorCmdRecord.setResultMessage("执行成功");
+			        //命令数据存入数据库
+			        doorCmdMapper.insert(doorCmdRecord);
+			        //立即下发回复数据到MQ
+			        rabbitMQSender.sendMessage(deviceId, doorRecordAll);
+					
 					result.put("templateId",template.getTemplateId());
 					result.put("returnCode","3000");
 					result.put("message","数据请求成功");
+			        
 					return result;
 				}
 			}
@@ -86,6 +154,13 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 		template.setOperateTime(sdf.format(new Date()));
 		template.setTemplateLevel(templateLevel);
 		template.setRoastingTime(roastingTime);
+		
+		BackgroundImageTemplate bt = backgroundImageTemplateMapper.SelectByTemplateId(templateId);
+		if(bt==null){
+			result.put("returnCode","3015");
+			result.put("message","主题不存在");
+			return result;
+		}
 		
 		int utNum = backgroundImageTemplateMapper.updateTemplate(template);
 		
@@ -126,13 +201,14 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 		// TODO Auto-generated method stub
 		Map<String, Object> result = new HashMap<>();
 		
+		BackgroundImageTemplate bit = backgroundImageTemplateMapper.SelectByTemplateId(templateId);
+		
 		int dtNum = backgroundImageTemplateMapper.deleteTemplate(templateId);
 		
 		if(dtNum > 0){
 			int dbNum = backgroundImageTemplateMapper.deleteBackgroundImageTemplate(templateId);
 			
 			if(dbNum > 0){
-				BackgroundImageTemplate bit = backgroundImageTemplateMapper.SelectByTemplateId(templateId);
 				
 				int diNum = backgroundImageTemplateMapper.deleteImage(bit.getImgId());
 				
@@ -157,6 +233,12 @@ public class BackgroundImageTemplateServiceImpl implements BackgroundImageTempla
 		
 		try {
 			Template tp = backgroundImageTemplateMapper.SelectTemplateById(templateId);
+			
+			if(tp==null){
+				result.put("returnCode","3015");
+				result.put("message","主题不存在");
+				return result;
+			}
 			
 			BackgroundImageTemplate bd = backgroundImageTemplateMapper.SelectByTemplateId(templateId);
 			
