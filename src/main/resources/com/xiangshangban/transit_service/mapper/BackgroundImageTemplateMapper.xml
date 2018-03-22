@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiangshangban.transit_service.dao.BackgroundImageTemplateMapper">
+
+  <resultMap id="BackgroundImageTemplateMap" type="com.xiangshangban.transit_service.bean.BackgroundImageTemplate">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="img_id" jdbcType="VARCHAR" property="imgId" />
+    <result column="template_id" jdbcType="VARCHAR" property="templateId" />
+    <result column="broad_start_date" jdbcType="VARCHAR" property="broadStartDate" />
+    <result column="broad_end_date" jdbcType="VARCHAR" property="broadEndDate" />
+    <result column="broad_start_time" jdbcType="VARCHAR" property="broadStartTime" />
+    <result column="broad_end_time" jdbcType="VARCHAR" property="broadEndTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="company_id" jdbcType="VARCHAR" property="companyId" />
+  </resultMap>
+  
+  <resultMap id="ImageMap" type="com.xiangshangban.transit_service.bean.Image">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="img_name" jdbcType="VARCHAR" property="imgName" />
+    <result column="img_url" jdbcType="VARCHAR" property="imgUrl" />
+    <result column="img_type" jdbcType="VARCHAR" property="imgType" />
+    <result column="relate" jdbcType="VARCHAR" property="relate" />
+    <result column="ripple_color" jdbcType="VARCHAR" property="rippleColor" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  
+  <resultMap id="TemplateMap" type="com.xiangshangban.transit_service.bean.Template">
+    <id column="template_id" jdbcType="VARCHAR" property="templateId" />
+    <result column="template_type" jdbcType="VARCHAR" property="templateType" />
+    <result column="template_level" jdbcType="VARCHAR" property="templateLevel" />
+    <result column="operate_time" jdbcType="VARCHAR" property="operateTime" />
+    <result column="operate_emp" jdbcType="VARCHAR" property="operateEmp" />
+    <result column="device_id" jdbcType="VARCHAR" property="deviceId" />
+    <result column="roasting_time" jdbcType="VARCHAR" property="roastingTime" />
+    <result column="logo_flag" jdbcType="VARCHAR" property="logoFlag" />
+    <result column="salutation_flag" jdbcType="VARCHAR" property="salutationFlag" />
+    <result column="festival_flag" jdbcType="VARCHAR" property="festivalFlag" />
+    <result column="template_style" jdbcType="VARCHAR" property="templateStyle" />
+    <result column="is_use" jdbcType="VARCHAR" property="isUse" />
+    <result column="is_standard" jdbcType="VARCHAR" property="isStandard" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  
+  <insert id="insertImage" parameterType="com.xiangshangban.transit_service.bean.Image">
+  	 insert into image_
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="imgName != null">
+        img_name,
+      </if>
+      <if test="imgUrl != null">
+     	 img_url,
+      </if>
+      <if test="imgType != null">
+     	 img_type,
+      </if>
+      <if test="relate != null">
+     	 relate,
+      </if>
+      <if test="rippleColor != null">
+     	 ripple_color,
+      </if>
+      <if test="status != null">
+     	 status
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="imgName != null">
+        #{imgName,jdbcType=VARCHAR},
+      </if>
+      <if test="imgUrl != null">
+     	#{imgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="imgType != null">
+     	#{imgType,jdbcType=VARCHAR},
+      </if>
+      <if test="relate != null">
+     	#{relate,jdbcType=VARCHAR},
+      </if>
+      <if test="rippleColor != null">
+     	#{rippleColor,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+     	#{status,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateImage" parameterType="com.xiangshangban.transit_service.bean.Image">
+  	update image_ set img_name=#{imgName}
+  	where id = #{id}
+  </update>
+  
+  <insert id="insertTemplate" parameterType="com.xiangshangban.transit_service.bean.Template">
+  	 insert into template_
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="templateType != null">
+        template_type,
+      </if>
+      <if test="templateLevel != null">
+     	template_level,
+      </if>
+      <if test="operateTime != null">
+     	operate_time,
+      </if>
+      <if test="operateEmp != null">
+     	operate_emp,
+      </if>
+      <if test="deviceId != null">
+     	device_id,
+      </if>
+      <if test="roastingTime != null">
+     	roasting_time,
+      </if>
+      <if test="logoFlag != null">
+     	logo_flag,
+      </if>
+      <if test="salutationFlag != null">
+     	salutation_flag,
+      </if>
+      <if test="festivalFlag != null">
+     	festival_flag,
+      </if>
+       <if test="templateStyle != null">
+     	template_style,
+      </if>
+      <if test="isUse != null">
+     	is_use,
+      </if>
+      <if test="isStandard != null">
+     	is_standard,
+      </if>
+      <if test="status != null">
+     	status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="templateId != null">
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateType != null">
+        #{templateType,jdbcType=VARCHAR},
+      </if>
+      <if test="templateLevel != null">
+     	#{templateLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null">
+     	#{operateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmp != null">
+     	#{operateEmp,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null">
+     	#{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="roastingTime != null">
+     	#{roastingTime,jdbcType=VARCHAR},
+      </if>
+      <if test="logoFlag != null">
+     	#{logoFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="salutationFlag != null">
+     	#{salutationFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalFlag != null">
+     	#{festivalFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="templateStyle != null">
+     	#{templateStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="isUse != null">
+     	#{isUse,jdbcType=VARCHAR},
+      </if>
+      <if test="isStandard != null">
+     	#{isStandard,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+     	#{status,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateTemplate" parameterType="com.xiangshangban.transit_service.bean.Template">
+  	update template_ set roasting_time = #{roastingTime},operate_time=#{operateTime}
+  	where template_id = #{templateId}
+  </update>
+  
+  <insert id="insertBackgroundImageTemplate" parameterType="com.xiangshangban.transit_service.bean.BackgroundImageTemplate">
+  	 insert into background_image_template
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="imgId != null">
+        img_id,
+      </if>
+      <if test="templateId != null">
+     	 template_id,
+      </if>
+      <if test="broadStartDate != null">
+     	 broad_start_date,
+      </if>
+      <if test="broadEndDate != null">
+     	 broad_end_date,
+      </if>
+      <if test="broadStartTime != null">
+     	 broad_start_time,
+      </if>
+      <if test="broadEndTime != null">
+     	 broad_end_time,
+      </if>
+      <if test="status != null">
+     	 status,
+      </if>
+      <if test="companyId != null">
+     	 company_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="imgId != null">
+        #{imgId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null">
+     	#{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartDate != null">
+     	#{broadStartDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndDate != null">
+     	#{broadEndDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartTime != null">
+     	#{broadStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndTime != null">
+     	#{broadEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+     	#{status,jdbcType=VARCHAR},
+      </if> 
+      <if test="companyId != null">
+     	#{companyId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+ 
+  <update id="updateBackgroundImageTemplate" parameterType="com.xiangshangban.transit_service.bean.BackgroundImageTemplate">
+  	update background_image_template set  broad_start_date=#{broadStartDate},broad_end_date=#{broadEndDate},broad_start_time=#{broadStartTime},broad_end_time=#{broadEndTime}
+  	where template_id = #{templateId}
+  </update>
+ 
+  <select id="SelectByTemplateId" parameterType="java.lang.String" resultMap="BackgroundImageTemplateMap">
+  	select * from background_image_template
+  	where template_id = #{templateId}
+  </select>
+ 
+  <delete id="deleteImage" parameterType="java.lang.String">
+  	DELETE from image_ where id = #{id}
+  </delete>
+ 
+  <delete id="deleteTemplate" parameterType="java.lang.String">
+  	delete from template_ where template_id = #{id}
+  </delete>
+ 
+  <delete id="deleteBackgroundImageTemplate">
+  	delete from background_image_template where template_id = #{id}
+  </delete>
+ 
+  <select id="SelectImageById" parameterType="java.lang.java" resultMap="ImageMap">
+  	 select * from image_
+  	 where id = #{id}
+  </select>
+ 
+  <select id="SelectTemplateById" parameterType="java.lang.String" resultMap="TemplateMap">
+  	select * from template_
+  	where template_id = #{id}
+  </select>
+  
+  <select id="FindAllByCompanyId" parameterType="java.lanng.String" resultMap="BackgroundImageTemplateMap">
+  	select * from background_image_template
+  	where company_id = #{companyId}
+  </select>
+  
+</mapper>
