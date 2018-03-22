@@ -62,7 +62,7 @@ public class VisitServiceImpl implements VisitService {
 			if(aleradyExistedElectronicIdentityCard==null){
 				electronicIdentityCardMapper.insertSelective(electronicIdentityCard);
 			}else{
-				electronicIdentityCardMapper.updateElectronicIdentityCard(aleradyExistedElectronicIdentityCard);
+				electronicIdentityCardMapper.updateElectronicIdentityCard(electronicIdentityCard);
 			}
 			result.put("visitKey", rsaStr+","+desStr);
 			result.put("visitFormat", "QR Code");
