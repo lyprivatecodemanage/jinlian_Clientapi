@@ -92,7 +92,7 @@ public class VisitServiceImpl implements VisitService {
 		RSAPublicKey publicKey;
 		try {
 			publicKey = RSAUtils.getPublicKey(deviceKey.getPublicKey());//公钥
-			StringBuffer data = new StringBuffer("1;"+employeeName+";"+employeeCompany+","+validBeginTime+";"+validEndTime+";"+doorListStr);//密文
+			StringBuffer data = new StringBuffer("1;"+employeeName+";"+employeeCompany+";"+validBeginTime+";"+validEndTime+";"+doorListStr);//密文
 			String md5Str = FileMD5Util.getMD5String(data.toString());
 			String rsaStr = RSAUtils.publicEncrypt(md5Str, publicKey);//rsa密文
 			String desStr = DESEncode.encrypt(data.toString());//des密文
